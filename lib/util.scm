@@ -65,7 +65,7 @@
 (define secs-in-std-4-years (* secs-in-day days-in-std-4-years))
 (define secs-in-non-std-4-years (* secs-in-day 365 4))
 
-(define (ts-to-date secs-since-1970)
+(define (ts->date secs-since-1970)
   (let* (
       (start-year 2000)
       (secs-since-start-year (- secs-since-1970 TS2000))
@@ -105,3 +105,45 @@
       (q-seconds r-minutes)
       (year (+ start-year (* 400 q400) (* 100 q100) (* 4 q4) q1)))
     (make-date 0 q-seconds q-minutes q-hours (+ 1 q-days) (+ 1 q-month) year 0)))
+
+(define (date->ts date)
+  (let* (
+      (start-year 2000)
+      (years-since-start-year (- (date-year date) start-year))
+      (q400 (floor-quotient years-since-start-year 400))
+      (r400 (floor-remainder years-since-start-year 400))
+      (q100 (quotient r400 100))
+      (r100 (remainder r400 100))
+      (q4 (quotient r100 4))
+      (r4 (remainder r100 4))
+      (q1 r4)
+      (non-leap? (or (> q1 0) (and (= q4 0) (> q100 0))))
+      (month (date-month date))
+      (days-per-month (list 31 (if non-leap? 28 29) 31 30 31 30 31 31 30 31 30 31))
+      (day (date-day date))
+      (hour (date-hour date))
+      (minute (date-minute date))
+      (second (date-second date)))
+    (+
+      TS2000
+      (* q400 secs-in-400-years)
+      (cond
+        ((= q100 0) 0)
+        (else (+ (* (- q100 1) (+ secs-in-non-std-4-years (* 24 secs-in-std-4-years))) (* 25 secs-in-std-4-years))))
+      (cond
+        ((= q4 0) 0)
+        (else (+ (* (- q4 1) secs-in-std-4-years) (if (= q100 0) secs-in-std-4-years secs-in-non-std-4-years))))
+      (cond
+        ((= q1 0) 0)
+        (else (+
+          (* (- q1 1) secs-in-non-leap-year)
+          (if (and (= q4 0) (> q100 0)) secs-in-non-leap-year secs-in-leap-year))))
+      (* secs-in-day
+        (let calc-month ((m month) (dpm days-per-month))
+          (cond
+            ((= m 1) 0)
+            (else (+ (car dpm) (calc-month (- m 1) (cdr dpm)))))))
+      (* secs-in-day (- day 1))
+      (* 3600 hour)
+      (* 60 minute)
+      second)))

@@ -58,17 +58,17 @@
   ; 946684799   : Friday, December 31, 1999 23:59:59 
   ; -11670946784 : Tuesday, February 29, 1600 14:20:16
   ; 219099113524 : Thursday, December 22, 8912 8:52:04
-  (display (ts-to-date 11138548331))(newline)
-  (display (ts-to-date 1671545714))(newline)
-  (display (ts-to-date 1672496416))(newline)
-  (display (ts-to-date 1669904416))(newline)
-  (display (ts-to-date 951834016))(newline)
-  (display (ts-to-date 983456416))(newline)
-  (display (ts-to-date 4107594016))(newline)
-  (display (ts-to-date 10418941216))(newline)
-  (display (ts-to-date 946684799))(newline)
-  (display (ts-to-date -11670946784))(newline)
-  (display (ts-to-date 219099113524))(newline)
+  (display (ts->date 11138548331))(newline)
+  (display (ts->date 1671545714))(newline)
+  (display (ts->date 1672496416))(newline)
+  (display (ts->date 1669904416))(newline)
+  (display (ts->date 951834016))(newline)
+  (display (ts->date 983456416))(newline)
+  (display (ts->date 4107594016))(newline)
+  (display (ts->date 10418941216))(newline)
+  (display (date->ts (ts->date 219099113524)))(newline)
+  (display (date->ts (ts->date -11670946784)))(newline)
+  (display (date->ts (ts->date 946684799)))(newline)
 
 )
 
