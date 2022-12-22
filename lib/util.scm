@@ -54,7 +54,7 @@
     '()
     (cons v (dup-val-to-list v (- n 1)))))
 
-; TS2000: Timestamp at 1970-01-01
+; TS2000 : Timestamp at 200-01-01
 (define TS2000  (* (+ 7 (* 30 365)) 24 60 60))
 (define secs-in-day (* 24 60 60))
 (define days-in-std-4-years (+ 1 (* 4 365)))
@@ -69,8 +69,8 @@
   (let* (
       (start-year 2000)
       (secs-since-start-year (- secs-since-1970 TS2000))
-      (q400 (quotient secs-since-start-year secs-in-400-years))
-      (r400 (remainder secs-since-start-year secs-in-400-years))
+      (q400 (floor-quotient secs-since-start-year secs-in-400-years))
+      (r400 (floor-remainder secs-since-start-year secs-in-400-years))
       (p100 (div-irregular r400
         (cons
           (+ secs-in-std-4-years (* 24 secs-in-std-4-years))
@@ -104,4 +104,4 @@
       (r-minutes (remainder r-hours 60))
       (q-seconds r-minutes)
       (year (+ start-year (* 400 q400) (* 100 q100) (* 4 q4) q1)))
-    (list year q-month q-days q-hours q-minutes q-seconds)))
+    (make-date 0 q-seconds q-minutes q-hours (+ 1 q-days) (+ 1 q-month) year 0)))

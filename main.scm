@@ -55,6 +55,7 @@
   ;  983456416  : Thursday, March 1, 2001 14:20:16 
   ; 4107594016  : Monday, March 1, 2100 14:20:16
   ; 10418941216 : Thursday, March 1, 2300 14:20:16 
+  ; 946684799   : Friday, December 31, 1999 23:59:59 
   ; -11670946784 : Tuesday, February 29, 1600 14:20:16 
   (display (ts-to-date 11138548331))(newline)
   (display (ts-to-date 1671545714))(newline)
@@ -64,6 +65,7 @@
   (display (ts-to-date 983456416))(newline)
   (display (ts-to-date 4107594016))(newline)
   (display (ts-to-date 10418941216))(newline)
+  (display (ts-to-date 946684799))(newline)
   (display (ts-to-date -11670946784))(newline)
 
 )
