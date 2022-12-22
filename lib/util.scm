@@ -7,34 +7,6 @@
     ((= 0 (modulo year   4)) #t)
     (else                    #f)))
 
-(define month-to-ndays (vector
-  -1
-  31 28 31 30
-  31 30 31 31
-  30 31 30 31))
-
-(define (add-day date)
-  (define day (date-day date))
-  (define month (date-month date))
-  (define year (date-year date))
-  (define max-days
-    (cond
-      ((= month 2) (if (is-leap? year) 29 28))
-      (else        (vector-ref month-to-ndays month))))
-  (set! day (+ day 1))
-  (if (> day max-days) (begin
-      (set! day 1)
-      (set! month (+ month 1))))
-  (if (> month 12) (begin
-    (set! month 1)
-    (set! year (+ year 1))))
-  (make-date 0 0 0 0 day month year 0))
-
-(define (add-days date n-days)
-  (cond
-    ((= n-days 0) date)
-    ((> n-days 0) (add-days (add-day date) (- n-days 1)))))
-
 (define (div-irregular a bs)
   ; Returns (r1 . r2)
   ; where a = (sum bs[:r1]) + r2
