@@ -1,6 +1,7 @@
 (use-modules (srfi srfi-9))
 (use-modules (ice-9 format))
 
+(include "lib/test-runner.scm")
 (include "lib/util.scm")
 (include "conf.scm")
 
@@ -46,29 +47,6 @@
   ;(call-with-values
   ;  (lambda () (div-irregular 22 '(11 8 2 3 4)))
   ;  (lambda (p1 p2) (display p1) (newline) (display p2)))
-
-  ; 11138548331 : Wednesday, December 20, 2322 9:12:11
-  ;  1671545714 : Tuesday, December 20, 2022 14:15:14
-  ;  1672496416 : Saturday, December 31, 2022 14:20:16 
-  ;  1669904416 : Thursday, December 1, 2022 14:20:16 
-  ;  951834016  : Tuesday, February 29, 2000 14:20:16 
-  ;  983456416  : Thursday, March 1, 2001 14:20:16 
-  ; 4107594016  : Monday, March 1, 2100 14:20:16
-  ; 10418941216 : Thursday, March 1, 2300 14:20:16 
-  ; 946684799   : Friday, December 31, 1999 23:59:59 
-  ; -11670946784 : Tuesday, February 29, 1600 14:20:16
-  ; 219099113524 : Thursday, December 22, 8912 8:52:04
-  (display (ts->date 11138548331))(newline)
-  (display (ts->date 1671545714))(newline)
-  (display (ts->date 1672496416))(newline)
-  (display (ts->date 1669904416))(newline)
-  (display (date->ts (ts->date 951834016)))(newline)
-  (display (date->ts (ts->date 983456416)))(newline)
-  (display (ts->date 4107594016))(newline)
-  (display (ts->date 10418941216))(newline)
-  (display (date->ts (ts->date 219099113524)))(newline)
-  (display (date->ts (ts->date -11670946784)))(newline)
-  (display (date->ts (ts->date 946684799)))(newline)
 
 )
 
