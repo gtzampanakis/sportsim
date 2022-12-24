@@ -2,7 +2,8 @@
 
 (define (test-fns name)
   (cond
-    ((equal? name 'assert-equal) (lambda (a b) (= a b)))))
+    ((eqv? name 'assert-eqv)
+      (lambda (a b) (if (not (eqv? a b)) (raise 'err))))))
 
 (define (run-tests)
   (for-each (lambda (test-fn) (test-fn test-fns))
