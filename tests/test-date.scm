@@ -10,4 +10,4 @@
         -11670946784 946684799)))
     (for-each
       (lambda (ts)
-        (assert-eqv 5 (date->ts (ts->date ts)))) tss)))
+        (assert-eqv ts (date->ts (ts->date ts)))) tss)))
