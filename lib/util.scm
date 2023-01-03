@@ -46,7 +46,8 @@
       (p100 (div-irregular r400
         (cons
           (+ secs-in-std-4-years (* 24 secs-in-std-4-years))
-          (dup-val-to-list (+ secs-in-non-std-4-years (* 24 secs-in-std-4-years)) 3))))
+          (dup-val-to-list
+            (+ secs-in-non-std-4-years (* 24 secs-in-std-4-years)) 3))))
       (q100 (list-ref p100 0))
       (r100 (list-ref p100 1))
       (p4 (div-irregular r100
@@ -76,7 +77,8 @@
       (r-minutes (remainder r-hours 60))
       (q-seconds r-minutes)
       (year (+ start-year (* 400 q400) (* 100 q100) (* 4 q4) q1)))
-    (make-date 0 q-seconds q-minutes q-hours (+ 1 q-days) (+ 1 q-month) year 0)))
+    (make-date
+      0 q-seconds q-minutes q-hours (+ 1 q-days) (+ 1 q-month) year 0)))
 
 (define (date->ts date)
   (let* (
@@ -91,7 +93,8 @@
       (q1 r4)
       (non-leap? (or (> q1 0) (and (= q4 0) (> q100 0))))
       (month (date-month date))
-      (days-per-month (list 31 (if non-leap? 28 29) 31 30 31 30 31 31 30 31 30 31))
+      (days-per-month
+        (list 31 (if non-leap? 28 29) 31 30 31 30 31 31 30 31 30 31))
       (day (date-day date))
       (hour (date-hour date))
       (minute (date-minute date))
@@ -101,15 +104,22 @@
       (* q400 secs-in-400-years)
       (cond
         ((= q100 0) 0)
-        (else (+ (* (- q100 1) (+ secs-in-non-std-4-years (* 24 secs-in-std-4-years))) (* 25 secs-in-std-4-years))))
+        (else (+ (*
+            (- q100 1)
+            (+ secs-in-non-std-4-years (* 24 secs-in-std-4-years))
+          ) (* 25 secs-in-std-4-years))))
       (cond
         ((= q4 0) 0)
-        (else (+ (* (- q4 1) secs-in-std-4-years) (if (= q100 0) secs-in-std-4-years secs-in-non-std-4-years))))
+        (else (+ (*
+            (- q4 1) secs-in-std-4-years)
+          (if (= q100 0) secs-in-std-4-years secs-in-non-std-4-years))))
       (cond
         ((= q1 0) 0)
         (else (+
           (* (- q1 1) secs-in-non-leap-year)
-          (if (and (= q4 0) (> q100 0)) secs-in-non-leap-year secs-in-leap-year))))
+          (if (and (= q4 0) (> q100 0))
+            secs-in-non-leap-year
+            secs-in-leap-year))))
       (* secs-in-day
         (let calc-month ((m month) (dpm days-per-month))
           (cond

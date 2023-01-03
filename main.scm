@@ -32,10 +32,6 @@
   (current-date world-current-date set-world-current-date!)
 )
 
-; (define p1
-;   (make-player "p1" "2022-01-01" (list (make-merit 'att 10) (make-merit 'def 12))))
-; (display p1)
-
 (define (progress-date sim-state)
   '()
 )
@@ -43,10 +39,6 @@
 (define (main)
   (set! *random-state* (random-state-from-platform))
   (format #t "Set random seed to ~a\n" (random-state->datum *random-state*))
-
-  ;(call-with-values
-  ;  (lambda () (div-irregular 22 '(11 8 2 3 4)))
-  ;  (lambda (p1 p2) (display p1) (newline) (display p2)))
 
 )
 
