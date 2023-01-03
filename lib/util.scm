@@ -21,10 +21,13 @@
           (r2 (list-ref p 1)))
             (list (+ 1 r1) r2))))))
 
-(define (dup-val-to-list v n)
-  (if (= n 0)
-    '()
-    (cons v (dup-val-to-list v (- n 1)))))
+(define dup-val-to-list
+  (case-lambda
+    ((v n s)
+      (if (= n 0)
+        s
+        (dup-val-to-list v (- n 1) (cons v s))))
+    ((v n) (dup-val-to-list v n '()))))
 
 ; TS2000 : Timestamp at 200-01-01
 (define TS2000  (* (+ 7 (* 30 365)) 24 60 60))

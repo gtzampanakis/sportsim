@@ -1,7 +1,6 @@
 (use-modules (srfi srfi-9))
 (use-modules (ice-9 format))
 
-(include "lib/test-runner.scm")
 (include "lib/util.scm")
 (include "conf.scm")
 
