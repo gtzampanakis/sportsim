@@ -21,13 +21,11 @@
           (r2 (list-ref p 1)))
             (list (+ 1 r1) r2))))))
 
-(define dup-val-to-list
-  (case-lambda
-    ((v n s)
-      (if (= n 0)
-        s
-        (dup-val-to-list v (- n 1) (cons v s))))
-    ((v n) (dup-val-to-list v n '()))))
+(define (append! l1 l2)
+  ; Note that this only works with non-empty l1.
+  (cond
+    ((eq? (cdr l1) '()) (set-cdr! l1 l2))
+    (else (append! (cdr l1) l2))))
 
 ; TS2000 : Timestamp at 200-01-01
 (define TS2000  (* (+ 7 (* 30 365)) 24 60 60))
@@ -49,21 +47,21 @@
       (p100 (div-irregular r400
         (cons
           (+ secs-in-std-4-years (* 24 secs-in-std-4-years))
-          (dup-val-to-list
-            (+ secs-in-non-std-4-years (* 24 secs-in-std-4-years)) 3))))
+          (make-list
+            3 (+ secs-in-non-std-4-years (* 24 secs-in-std-4-years))))))
       (q100 (list-ref p100 0))
       (r100 (list-ref p100 1))
       (p4 (div-irregular r100
         (cons
           (if (= q100 0) secs-in-std-4-years secs-in-non-std-4-years)
-          (dup-val-to-list secs-in-std-4-years 24))))
+          (make-list 24 secs-in-std-4-years))))
       (q4 (list-ref p4 0))
       (r4 (list-ref p4 1))
       (is-non-std? (and (= q4 0) (or (= q100 1) (= q100 2) (= q100 3))))
       (p1 (div-irregular r4
         (cons
           (if is-non-std? secs-in-non-leap-year secs-in-leap-year)
-          (dup-val-to-list secs-in-non-leap-year 3))))
+          (make-list 3 secs-in-non-leap-year))))
       (q1 (list-ref p1 0))
       (r1 (list-ref p1 1))
       (leap? (and (not is-non-std?) (= q1 0)))

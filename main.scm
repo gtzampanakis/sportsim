@@ -31,11 +31,18 @@
   (current-date world-current-date set-world-current-date!)
 )
 
-(define (progress-date sim-state)
-  '()
-)
+(define (run sch)
+  (unless (eqv? sch '())
+    (let (
+        (p (car sch))
+        (ts (car p))
+        (proc (cdr p)))
+      (proc)
+      (run (cdr sch)))))
 
 (define (main)
+  (define sch '())
+
   (set! *random-state* (random-state-from-platform))
   (format #t "Set random seed to ~a\n" (random-state->datum *random-state*))
 
