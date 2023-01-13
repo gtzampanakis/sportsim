@@ -130,3 +130,6 @@
       (* 3600 hour)
       (* 60 minute)
       second)))
+
+(define (date y m d)
+  (make-date 0 0 0 0 d m y 0))
