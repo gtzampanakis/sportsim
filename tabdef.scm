@@ -6,18 +6,6 @@
   (cons 'country (list
     (cons 'fields '(id name))))
   (cons 'team (list
-    (cons 'fields '(id name country-id))))))
-
-(define-syntax fi
-  (lambda (x)
-    (syntax-case x (player country id name dob)
-      ((_ player id) #'0)
-      ((_ player name) #'1)
-      ((_ player dob) #'2)
-      ((_ player team-id) #'3)
-      ((_ player ratings) #'4)
-      ((_ country id) #'0)
-      ((_ country name) #'1)
-      ((_ team id) #'0)
-      ((_ team name) #'1)
-      ((_ team country-id) #'2))))
+    (cons 'fields '(id name country-id))))
+  (cons 'scheduled-item (list
+    (cons 'fields '(id name date))))))

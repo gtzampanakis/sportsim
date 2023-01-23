@@ -1,5 +1,19 @@
 (use-modules (srfi srfi-19))
 
+(define-syntax thread-last
+; example: (thread-last cons '() 2 3 5)
+; returns: (2 3 5)
+  (syntax-rules ()
+    ((_ proc init arg)
+      (proc arg init))
+    ((_ proc init arg arg* ...)
+      (thread-last proc (thread-last proc init arg* ...) arg))))
+
+(define-syntax alist
+  (syntax-rules ()
+    ((_) '())
+    ((_ (k v) ...) (list (cons k v) ...))))
+
 (define (is-leap? year)
   (cond
     ((= 0 (modulo year 400)) #t)
@@ -130,6 +144,12 @@
       (* 3600 hour)
       (* 60 minute)
       second)))
+
+(define (add-days date days)
+  (ts->date (+ (* days 3600 24) (date->ts date))))
+
+(define (add-day date)
+  (add-days date 1))
 
 (define (date y m d)
   (make-date 0 0 0 0 d m y 0))
