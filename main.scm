@@ -14,6 +14,18 @@
         (insert-record! db tab-name r)
         (loop (+ i 1))))))
 
+(define (schedule-league-fixtures db)
+  (define countries (cdr (assoc (list 'table 'country 'data) db)))
+  (hash-for-each
+    (lambda (country-id country-rec)
+      (schedule-league-fixtures-for-country db country-id))
+    countries))
+
+(define (schedule-league-fixtures-for-country db country-id)
+  (define teams
+    (query-tab db 'team (lambda (r) (= (vector-ref r 2) country-id)) 5))
+  (display (length teams)))
+
 (define (main)
   (set! *random-state* (random-state-from-platform))
   (format #t "Set random seed to ~a\n" (random-state->datum *random-state*))
@@ -70,9 +82,12 @@
           (let (
               (month (date-month current-date))
               (day (date-day current-date)))
-            (when (and (= month 8) (= day 1))
-              'foo))
-          (loop (add-day current-date)))))
+            (when
+                (and
+                  (= month (date-month start-date))
+                  (= day (date-day start-date)))
+              (schedule-league-fixtures db))
+          (loop (add-day current-date))))))
 
 ))
       

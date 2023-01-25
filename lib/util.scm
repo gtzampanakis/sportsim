@@ -14,13 +14,6 @@
     ((_) '())
     ((_ (k v) ...) (list (cons k v) ...))))
 
-(define (is-leap? year)
-  (cond
-    ((= 0 (modulo year 400)) #t)
-    ((= 0 (modulo year 100)) #f)
-    ((= 0 (modulo year   4)) #t)
-    (else                    #f)))
-
 (define (div-irregular a bs)
   ; Returns (r1 . r2)
   ; where a = (sum bs[:r1]) + r2
@@ -34,12 +27,6 @@
           (r1 (list-ref p 0))
           (r2 (list-ref p 1)))
             (list (+ 1 r1) r2))))))
-
-(define (append! l1 l2)
-  ; Note that this only works with non-empty l1.
-  (cond
-    ((eq? (cdr l1) '()) (set-cdr! l1 l2))
-    (else (append! (cdr l1) l2))))
 
 ; TS2000 : Timestamp at 200-01-01
 (define TS2000  (* (+ 7 (* 30 365)) 24 60 60))
