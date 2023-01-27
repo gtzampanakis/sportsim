@@ -16,14 +16,15 @@
 
 (define (schedule-league-fixtures db)
   (define countries (cdr (assoc (list 'table 'country 'data) db)))
-  (hash-for-each
-    (lambda (country-id country-rec)
-      (schedule-league-fixtures-for-country db country-id))
-    countries))
+  (for-each
+    (lambda (r) (schedule-league-fixtures-for-country db (vector-ref r 0)))
+    (query-tab db 'country (lambda (r) #t))))
 
 (define (schedule-league-fixtures-for-country db country-id)
   (define teams
-    (query-tab db 'team (lambda (r) (= (vector-ref r 2) country-id)) 5))
+    (query-tab db 'team
+      (lambda (r)
+        (= (vector-ref r (db-meta team fi country-id)) country-id))))
   (display (length teams)))
 
 (define (main)
@@ -43,7 +44,9 @@
         'country
         n
         (lambda (i)
-          (vector i (number->string i)))))
+          (make-record country (
+            (id i)
+            (name (number->string i)))))))
 
     (let* (
         (ntpc (assv-ref conf 'n-teams-per-country))
@@ -54,7 +57,10 @@
         'team
         n
         (lambda (i)
-          (vector i (number->string i) (quotient i ntpc)))))
+          (make-record team (
+            (id i) 
+            (name (number->string i))
+            (country-id (quotient i ntpc)))))))
     
     (let* (
         (nppt (assv-ref conf 'n-players-per-team))
@@ -66,12 +72,12 @@
         'player
         n
         (lambda (i)
-          (vector
-            i
-            (number->string i)
-            (date 2004 1 1)
-            (quotient i nppt)
-            #(50 50)))))
+          (make-record player (
+            (id i)
+            (name (number->string i))
+            (dob (date 2004 1 1))
+            (team-id (quotient i nppt))
+            (ratings #(50 50)))))))
     
     (let (
         (start-date (assv-ref conf 'start-date))
@@ -88,6 +94,8 @@
                   (= day (date-day start-date)))
               (schedule-league-fixtures db))
           (loop (add-day current-date))))))
+
+    (display (make-record country ((id 0) (name 'foo))))
 
 ))
       
