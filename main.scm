@@ -2,10 +2,10 @@
 (use-modules (srfi srfi-19))
 (use-modules (ice-9 format))
 
-(include "lib/util.scm")
-(include "conf.scm")
-(include "tabdef.scm")
-(include "db.scm")
+(use-modules (lib util))
+(use-modules (conf))
+(use-modules (tabdef))
+(use-modules (db))
 
 (define (create-entities! db tab-name n creator-proc)
   (let loop ((i 0))
@@ -24,7 +24,7 @@
   (define teams
     (query-tab db 'team
       (lambda (r)
-        (= (vector-ref r (db-meta team fi country-id)) country-id))))
+        (equal? (vector-ref r 2) country-id)))) ; fix this hard-coded "2"
   (display (length teams)))
 
 (define (main)
@@ -94,8 +94,6 @@
                   (= day (date-day start-date)))
               (schedule-league-fixtures db))
           (loop (add-day current-date))))))
-
-    (display (make-record country ((id 0) (name 'foo))))
 
 ))
       

@@ -1,3 +1,5 @@
+(define-module (lib util))
+
 (use-modules (srfi srfi-19))
 
 (define-syntax thread-last
@@ -39,7 +41,7 @@
 (define secs-in-std-4-years (* secs-in-day days-in-std-4-years))
 (define secs-in-non-std-4-years (* secs-in-day 365 4))
 
-(define (ts->date secs-since-1970)
+(define-public (ts->date secs-since-1970)
   (let* (
       (start-year 2000)
       (secs-since-start-year (- secs-since-1970 TS2000))
@@ -82,7 +84,7 @@
     (make-date
       0 q-seconds q-minutes q-hours (+ 1 q-days) (+ 1 q-month) year 0)))
 
-(define (date->ts date)
+(define-public (date->ts date)
   (let* (
       (start-year 2000)
       (years-since-start-year (- (date-year date) start-year))
@@ -132,11 +134,11 @@
       (* 60 minute)
       second)))
 
-(define (add-days date days)
+(define-public (add-days date days)
   (ts->date (+ (* days 3600 24) (date->ts date))))
 
-(define (add-day date)
+(define-public (add-day date)
   (add-days date 1))
 
-(define (date y m d)
+(define-public (date y m d)
   (make-date 0 0 0 0 d m y 0))

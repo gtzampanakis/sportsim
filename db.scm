@@ -1,15 +1,20 @@
-(define (create-db)
+(define-module (db)
+  #:export (make-record make-record-2 fields-to-values))
+
+(use-modules (tabdef))
+
+(define-public (create-db)
   '())
 
-(define (create-tab db tab-name)
+(define-public (create-tab db tab-name)
   (let ((pair (cons (list 'table tab-name 'data) (make-hash-table))))
     (cons pair db)))
 
-(define (insert-record! db tab-name record)
+(define-public (insert-record! db tab-name record)
   (let ((h (cdr (assoc (list 'table tab-name 'data) db))))
     (hash-set! h (vector-ref record 0) record)))
 
-(define query-tab
+(define-public query-tab
   (case-lambda
     ((db tab-name pred) (query-tab db tab-name pred -1))
     ((db tab-name pred limit)
@@ -35,13 +40,44 @@
               records)
             (lambda (_) records)))))))
 
-(define (query-tab-single db tab-name pred)
+(define-public (query-tab-single db tab-name pred)
   (define results (query-tab db tab-name pred 1))
   (if (null? results) '() (car results)))
 
+(define-syntax field-to-index
+  (lambda (x)
+    (syntax-case x ()
+      ((_ field-to-find (field ...))
+        #'(field-to-index (field ...) 0))
+      ((_ field-to-find () i)
+        #''nil)
+      ((_ field-to-find (field1 field2 ...) i)
+        (if (equal? #'field-to-find #'field1)
+          #'i
+          (let ((i (syntax->datum #'i)))
+            #`(field-to-index field-to-find (field2 ...) #,(+ 1 i))))))))
+
+(define-syntax field-to-value
+  (lambda (x)
+    (syntax-case x ()
+      ((_ field ())
+        #''nil)
+      ((_ field ((k1 v1) . tail))
+        (if (equal? (syntax->datum #'field) (syntax->datum #'k1))
+          #'v1
+          #'(field-to-value field tail))))))
+
+(define-syntax fields-to-values
+  (lambda (x)
+    (syntax-case x ()
+      ((_ (field1 ...) assignments)
+        #'(list (field-to-value field1 assignments) ...)))))
+
 (define-syntax make-record
-  (syntax-rules ()
-    ((_ tab-name ((field-name val) ...))
-      (let ((vect (make-vector (db-meta tab-name nf))))
-        (vector-set! vect (db-meta tab-name fi field-name) val) ...
-        vect))))
+  (lambda (x)
+    (syntax-case x ()
+      ((_ tab assignments)
+        (let (
+            (fields
+              (datum->syntax #'tab (db-meta 'fields (syntax->datum #'tab)))))
+          #`(apply vector (fields-to-values #,fields assignments)))))))
