@@ -24,12 +24,16 @@
   (define teams
     (query-tab db 'team
       (lambda (r)
-        (equal? (vector-ref r 2) country-id)))) ; fix this hard-coded "2"
+        (equal? (vector-ref r 2) country-id)))) ; TODO fix this hard-coded "2"
   (display (length teams)))
 
 (define (main)
   (set! *random-state* (random-state-from-platform))
   (format #t "Set random seed to ~a\n" (random-state->datum *random-state*))
+
+  (display (record-attr player team-id (vector 0 1 2 3 4 5 6)))
+
+  (exit)
 
   (let* (
       (db (create-db))
@@ -38,6 +42,7 @@
       (db (create-tab db 'team))
       (db (create-tab db 'scheduled-item)))
 
+    ; Generate countries.
     (let* ((n (assv-ref conf 'n-countries)))
       (create-entities!
         db
@@ -48,6 +53,7 @@
             (id i)
             (name (number->string i)))))))
 
+    ; Generate teams and assign them to countries.
     (let* (
         (ntpc (assv-ref conf 'n-teams-per-country))
         (nc (assv-ref conf 'n-countries))
@@ -61,7 +67,8 @@
             (id i) 
             (name (number->string i))
             (country-id (quotient i ntpc)))))))
-    
+
+    ; Generate players and assign them to teams.
     (let* (
         (nppt (assv-ref conf 'n-players-per-team))
         (ntpc (assv-ref conf 'n-teams-per-country))
@@ -78,7 +85,7 @@
             (dob (date 2004 1 1))
             (team-id (quotient i nppt))
             (ratings #(50 50)))))))
-    
+
     (let (
         (start-date (assv-ref conf 'start-date))
         (stop-date (assv-ref conf 'stop-date)))

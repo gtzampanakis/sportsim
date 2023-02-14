@@ -1,5 +1,5 @@
 (define-module (db)
-  #:export (make-record make-record-2 fields-to-values))
+  #:export (make-record field-to-index fields-to-values record-attr))
 
 (use-modules (tabdef))
 
@@ -48,7 +48,7 @@
   (lambda (x)
     (syntax-case x ()
       ((_ field-to-find (field ...))
-        #'(field-to-index (field ...) 0))
+        #'(field-to-index field-to-find (field ...) 0))
       ((_ field-to-find () i)
         #''nil)
       ((_ field-to-find (field1 field2 ...) i)
@@ -81,3 +81,12 @@
             (fields
               (datum->syntax #'tab (db-meta 'fields (syntax->datum #'tab)))))
           #`(apply vector (fields-to-values #,fields assignments)))))))
+
+(define-syntax record-attr
+  (lambda (x)
+    (syntax-case x ()
+      ((_ tab field record)
+        (let (
+            (fields
+              (datum->syntax #'tab (db-meta 'fields (syntax->datum #'tab)))))
+          #`(vector-ref record (field-to-index field #,fields)))))))
