@@ -16,6 +16,7 @@
 
 (define-public query-tab
   (case-lambda
+    ((db tab-name) (query-tab db tab-name (lambda (r) #t)))
     ((db tab-name pred) (query-tab db tab-name pred -1))
     ((db tab-name pred limit)
       (if (= limit 0) '()

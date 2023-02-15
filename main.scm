@@ -17,23 +17,20 @@
 (define (schedule-league-fixtures db)
   (define countries (cdr (assoc (list 'table 'country 'data) db)))
   (for-each
-    (lambda (r) (schedule-league-fixtures-for-country db (vector-ref r 0)))
-    (query-tab db 'country (lambda (r) #t))))
+    (lambda (r)
+      (schedule-league-fixtures-for-country db (record-attr country id r)))
+    (query-tab db 'country)))
 
 (define (schedule-league-fixtures-for-country db country-id)
   (define teams
     (query-tab db 'team
       (lambda (r)
-        (equal? (vector-ref r 2) country-id)))) ; TODO fix this hard-coded "2"
+        (equal? (record-attr team country-id r) country-id))))
   (display (length teams)))
 
 (define (main)
   (set! *random-state* (random-state-from-platform))
   (format #t "Set random seed to ~a\n" (random-state->datum *random-state*))
-
-  (display (record-attr player team-id (vector 0 1 2 3 4 5 6)))
-
-  (exit)
 
   (let* (
       (db (create-db))
