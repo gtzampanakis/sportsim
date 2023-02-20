@@ -47,7 +47,6 @@
         n
         (lambda (i)
           (make-record country (
-            (id i)
             (name (number->string i)))))))
 
     ; Generate teams and assign them to countries.
@@ -61,7 +60,6 @@
         n
         (lambda (i)
           (make-record team (
-            (id i) 
             (name (number->string i))
             (country-id (quotient i ntpc)))))))
 
@@ -77,7 +75,6 @@
         n
         (lambda (i)
           (make-record player (
-            (id i)
             (name (number->string i))
             (dob (date 2004 1 1))
             (team-id (quotient i nppt))

@@ -11,11 +11,6 @@
     ((_ proc init arg arg* ...)
       (thread-last proc (thread-last proc init arg* ...) arg))))
 
-(define-syntax alist
-  (syntax-rules ()
-    ((_) '())
-    ((_ (k v) ...) (list (cons k v) ...))))
-
 (define (div-irregular a bs)
   ; Returns (r1 . r2)
   ; where a = (sum bs[:r1]) + r2

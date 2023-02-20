@@ -6,6 +6,10 @@
 (define-public (create-db)
   '())
 
+(define max-id (expt 2 64))
+(define-public (generate-id)
+  (random max-id))
+
 (define-public (create-tab db tab-name)
   (let ((pair (cons (list 'table tab-name 'data) (make-hash-table))))
     (cons pair db)))
@@ -80,8 +84,12 @@
       ((_ tab assignments)
         (let (
             (fields
-              (datum->syntax #'tab (db-meta 'fields (syntax->datum #'tab)))))
-          #`(apply vector (fields-to-values #,fields assignments)))))))
+              (datum->syntax #'tab (db-meta 'fields (syntax->datum #'tab))))
+            (assignments
+              (datum->syntax #'tab
+                (append
+                  (syntax->datum #'assignments) '((id (generate-id)))))))
+          #`(apply vector (fields-to-values #,fields #,assignments)))))))
 
 (define-syntax record-attr
   (lambda (x)
