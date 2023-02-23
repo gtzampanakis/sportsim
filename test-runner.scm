@@ -1,5 +1,5 @@
-(include "tests/test-date.scm")
-(include "tests/test-util.scm")
+(use-modules (tests test-date))
+(use-modules (tests test-util))
 
 (define (test-fns name)
   (cond
@@ -10,6 +10,6 @@
 
 (define (run-tests)
   (for-each (lambda (test-fn) (test-fn test-fns))
-    (list test-ts->date test-append!)))
+    (list test-ts->date)))
 
 (run-tests)

@@ -1,6 +1,8 @@
-(include "../lib/util.scm")
+(define-module (tests test-date))
 
-(define (test-ts->date test-fns)
+(use-modules (lib util))
+
+(define-public (test-ts->date test-fns)
   (let (
       (assert-eqv (test-fns 'assert-eqv))
       (tss (list
