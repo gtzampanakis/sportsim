@@ -1,3 +1,5 @@
+(import (rnrs base (6)))
+
 (use-modules (srfi srfi-9))
 (use-modules (srfi srfi-19))
 (use-modules (ice-9 format))
@@ -26,7 +28,13 @@
     (query-tab db 'team
       (lambda (r)
         (equal? (record-attr team country-id r) country-id))))
-  (display (length teams)))
+  ;(define rec
+  ;  (make-record scheduled-item (
+  ;    (datetime foo))))
+  (define n-teams (length teams))
+  (define matches-per-round (quotient n-teams 2))
+
+  (assert (= (remainder n-teams 2) 0)))
 
 (define (main)
   (set! *random-state* (random-state-from-platform))

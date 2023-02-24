@@ -12,4 +12,4 @@
         ((equal? args '(fields team))
           '(id name country-id))
         ((equal? args '(fields scheduled-item))
-          '(id name date))))))
+          '(id datetime payload))))))

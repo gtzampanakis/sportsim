@@ -137,3 +137,21 @@
 
 (define-public (date y m d)
   (make-date 0 0 0 0 d m y 0))
+
+(define-public (list-insert ls ind obj)
+  (let loop ((ls ls) (ind ind) (prefix '()))
+    (append prefix
+      (cond
+        ((null? ls) (list obj))
+        ((= ind 0) (cons obj ls))
+        ((= ind 1) (cons (car ls) (cons obj (cdr ls))))
+        (else (loop (cdr ls) (1- ind) (list (car ls))))))))
+
+(define-public (gen-rand-perm n)
+  (let loop ((result '()) (i 0))
+    (if (= i n)
+      result
+      (loop (list-insert result (random (1+ i)) i) (1+ i)))))
+
+(define-public (gen-n-teams)
+  (display 1))
