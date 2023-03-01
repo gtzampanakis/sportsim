@@ -7,9 +7,7 @@
   ;test-gen-rand-perm))
 
 (define (raise-failed-test obj)
-  (display obj)
-  (newline)
-  (raise 1))
+  (raise-exception 'exception-failed-test #:continuable? #f))
 
 (define test-fns
   (lambda (name . args)
@@ -23,15 +21,44 @@
             (if (not (equal? a b)) (raise-failed-test (list a b))))))
       args)))
 
+(define (display-run-tests-results outcomes)
+  (let loop (
+      (outcomes outcomes)
+      (n-all 0)
+      (n-success 0)
+      (n-failure 0)
+      (n-error 0))
+    (if (null? outcomes)
+      (format #t
+        "Outcome: ~a\nTests: ~a Success: ~a Failure: ~a Error: ~a\n"
+        (if (= n-all n-success) "PASS" "FAIL")
+        n-all
+        n-success
+        n-failure
+        n-error)
+      (loop
+        (cdr outcomes)
+        (+ n-all 1)
+        (+ n-success (if (equal? (car outcomes) 'success) 1 0))
+        (+ n-failure (if (equal? (car outcomes) 'failure) 1 0))
+        (+ n-error (if (equal? (car outcomes) 'error) 1 0))))))
+
 (define (run-tests)
-  (let loop ((test-suite test-suite) (success 0) (fail 0) (err 0))
+  (let loop ((test-suite test-suite) (outcomes '()))
     (if (null? test-suite)
-      (list success fail err)
+      (display-run-tests-results outcomes)
       (let (
           (test-suite-fn (car test-suite)))
         (with-exception-handler
-            (lambda (e) )
-          (test-suite-fn test-fns))
-        (loop (cdr test-suite) (1+ success) fail err)))))
+          (lambda (exc)
+            (cond
+              ((equal? exc 'exception-failed-test)
+                (loop (cdr test-suite) (cons 'failure outcomes)))
+              (else
+                (loop (cdr test-suite) (cons 'error outcomes)))))
+          (lambda ()
+            (test-suite-fn test-fns)
+            (loop (cdr test-suite) (cons 'success outcomes)))
+          #:unwind? #t)))))
 
 (run-tests)
