@@ -6,7 +6,7 @@
 (define-public (test-list-insert test-fns)
   (test-fns 'assert-equal (list-insert '() 0 'obj) '(obj))
   (test-fns 'assert-equal (list-insert '() 1 'obj) '(obj))
-  (test-fns 'assert-equal (list-insert '(a) 0 'obj) '(obj c))
+  (test-fns 'assert-equal (list-insert '(a) 0 'obj) '(obj a))
   (test-fns 'assert-equal (list-insert '(a) 1 'obj) '(a obj))
   (test-fns 'assert-equal (list-insert '(a b) 0 'obj) '(obj a b))
   (test-fns 'assert-equal (list-insert '(a b) 1 'obj) '(a obj b))
