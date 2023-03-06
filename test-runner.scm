@@ -48,17 +48,15 @@
     (if (null? test-suite)
       (display-run-tests-results outcomes)
       (let (
-          (test-suite-fn (car test-suite)))
-        (with-exception-handler
-          (lambda (exc)
-            (cond
-              ((equal? exc 'exception-failed-test)
-                (loop (cdr test-suite) (cons 'failure outcomes)))
-              (else
-                (loop (cdr test-suite) (cons 'error outcomes)))))
-          (lambda ()
-            (test-suite-fn test-fns)
-            (loop (cdr test-suite) (cons 'success outcomes)))
-          #:unwind? #t)))))
+          (outcome
+            (let ((test-suite-fn (car test-suite)))
+              (with-exception-handler
+                (lambda (exc)
+                  (cond
+                    ((equal? exc 'exception-failed-test) 'failure)
+                    (else 'error)))
+                (lambda () (test-suite-fn test-fns) 'success)
+                #:unwind? #t))))
+        (loop (cdr test-suite) (cons outcome outcomes))))))
 
 (run-tests)
