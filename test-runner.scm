@@ -1,3 +1,5 @@
+(use-modules (system repl error-handling))
+
 (use-modules (tests test-date))
 (use-modules (tests test-util))
 
@@ -36,12 +38,19 @@
         n-success
         n-failure
         n-error)
-      (loop
-        (cdr outcomes)
-        (+ n-all 1)
-        (+ n-success (if (equal? (car outcomes) 'success) 1 0))
-        (+ n-failure (if (equal? (car outcomes) 'failure) 1 0))
-        (+ n-error (if (equal? (car outcomes) 'error) 1 0))))))
+      (let* (
+          (outcome (car outcomes))
+          (outcome-type (vector-ref outcome 0))
+          (st (vector-ref outcome 1)))
+        (when (not (null? st))
+          (newline)
+          (display-backtrace st (current-error-port)))
+        (loop
+          (cdr outcomes)
+          (+ n-all 1)
+          (+ n-success (if (equal? outcome-type 'success) 1 0))
+          (+ n-failure (if (equal? outcome-type 'failure) 1 0))
+          (+ n-error (if (equal? outcome-type 'error) 1 0)))))))
 
 (define (run-tests)
   (let loop ((test-suite test-suite) (outcomes '()))
@@ -50,13 +59,26 @@
       (let (
           (outcome
             (let ((test-suite-fn (car test-suite)))
-              (with-exception-handler
-                (lambda (exc)
-                  (cond
-                    ((equal? exc 'exception-failed-test) 'failure)
-                    (else 'error)))
-                (lambda () (test-suite-fn test-fns) 'success)
-                #:unwind? #t))))
-        (loop (cdr test-suite) (cons outcome outcomes))))))
+              (define st '())
+              (call-with-error-handling
+                (lambda ()
+                  (test-suite-fn test-fns)
+                  (vector 'success '()))
+                #:on-error
+                (lambda (key . args)
+                  (set! st (make-stack #t)))
+                #:post-error
+                (lambda (key . args)
+                  (vector
+                    (if
+                      (and
+                        (not (null? args))
+                        (equal? (car args) 'exception-failed-test))
+                      'failure
+                      'error)
+                    st))))))
+        (loop
+          (cdr test-suite)
+          (cons outcome outcomes))))))
 
 (run-tests)
