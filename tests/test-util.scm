@@ -18,9 +18,7 @@
 
 (define-public (test-gen-rand-perm test-fns)
   (with-random-state 'foo
-    (let (
-        (assert-equal (test-fns 'assert-equal)))
-      (assert-equal (gen-rand-perm 0) '())
-      (assert-equal (gen-rand-perm 1) '(0))
-      (assert-equal (gen-rand-perm 2) '(0 1))
-      (assert-equal (gen-rand-perm 3) '(0 1 2)))))
+    (test-fns 'assert-equal (gen-rand-perm 0) '())
+    (test-fns 'assert-equal (gen-rand-perm 1) '(0))
+    (test-fns 'assert-equal (gen-rand-perm 2) '(0 1))
+    (test-fns 'assert-equal (gen-rand-perm 3) '(0 1 2))))
