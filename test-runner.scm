@@ -5,8 +5,8 @@
 
 (define test-suite (list
   test-ts->date
-  test-list-insert))
-  ;test-gen-rand-perm))
+  test-list-insert
+  test-gen-rand-perm))
 
 (define (raise-failed-test obj)
   (raise-exception (cons 'exception-failed-test obj)))

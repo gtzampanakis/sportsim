@@ -1,7 +1,9 @@
 (define-module (tests util)
-  #:export (with-random-state))
+  #:export (with-random-seed))
 
-(define-syntax with-random-state
+(define-syntax with-random-seed
   (syntax-rules ()
-    ((_ state body ...)
-      (begin body ...))))
+    ((_ seed body ...)
+      (begin
+        (set! *random-state* (seed->random-state seed))
+        body ...))))

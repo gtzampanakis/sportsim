@@ -28,9 +28,6 @@
     (query-tab db 'team
       (lambda (r)
         (equal? (record-attr team country-id r) country-id))))
-  ;(define rec
-  ;  (make-record scheduled-item (
-  ;    (datetime foo))))
   (define n-teams (length teams))
   (define matches-per-round (quotient n-teams 2))
 

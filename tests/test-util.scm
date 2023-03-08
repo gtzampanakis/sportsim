@@ -17,8 +17,15 @@
   (test-fns 'assert-equal (list-insert '(a b c) 3 'obj) '(a b c obj)))
 
 (define-public (test-gen-rand-perm test-fns)
-  (with-random-state 'foo
+  (with-random-seed "dc9ee38a"
     (test-fns 'assert-equal (gen-rand-perm 0) '())
     (test-fns 'assert-equal (gen-rand-perm 1) '(0))
     (test-fns 'assert-equal (gen-rand-perm 2) '(0 1))
+    (test-fns 'assert-equal (gen-rand-perm 2) '(1 0))
+    (test-fns 'assert-equal (gen-rand-perm 3) '(1 0 2))
+    (test-fns 'assert-equal (gen-rand-perm 3) '(1 0 2))
+    (test-fns 'assert-equal (gen-rand-perm 3) '(1 0 2))
+    (test-fns 'assert-equal (gen-rand-perm 3) '(2 1 0))
+    (test-fns 'assert-equal (gen-rand-perm 3) '(1 0 2))
+    (test-fns 'assert-equal (gen-rand-perm 3) '(2 0 1))
     (test-fns 'assert-equal (gen-rand-perm 3) '(0 1 2))))
