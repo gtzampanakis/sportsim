@@ -28,4 +28,6 @@
     (test-fns 'assert-equal (gen-rand-perm 3) '(2 1 0))
     (test-fns 'assert-equal (gen-rand-perm 3) '(1 0 2))
     (test-fns 'assert-equal (gen-rand-perm 3) '(2 0 1))
-    (test-fns 'assert-equal (gen-rand-perm 3) '(0 1 2))))
+    (test-fns 'assert-equal (gen-rand-perm 3) '(0 1 2))
+    (test-fns 'assert-equal (gen-rand-perm 10) '(6 1 4 9 2 0 3 7 5 8))
+    (test-fns 'assert-equal (gen-rand-perm 10) '(5 4 2 1 0 7 6 8 9 3))))
