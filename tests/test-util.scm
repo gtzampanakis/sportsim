@@ -31,3 +31,19 @@
     (test-fns 'assert-equal (gen-rand-perm 3) '(0 1 2))
     (test-fns 'assert-equal (gen-rand-perm 10) '(6 1 4 9 2 0 3 7 5 8))
     (test-fns 'assert-equal (gen-rand-perm 10) '(5 4 2 1 0 7 6 8 9 3))))
+
+(define-public (test-gen-round-robin-no-order test-fns)
+  (test-fns 'assert-equal (gen-round-robin-no-order 2) '(((0 . 1))))
+  (test-fns 'assert-equal (gen-round-robin-no-order 4) '(
+    ((2 . 3) (0 . 1))
+    ((3 . 1) (0 . 2))
+    ((1 . 2) (0 . 3))
+  ))
+  (test-fns 'assert-equal (gen-round-robin-no-order 6) '(
+    ((3 . 4) (2 . 5) (0 . 1))
+    ((4 . 5) (3 . 1) (0 . 2))
+    ((5 . 1) (4 . 2) (0 . 3))
+    ((1 . 2) (5 . 3) (0 . 4))
+    ((2 . 3) (1 . 4) (0 . 5))
+  ))
+)

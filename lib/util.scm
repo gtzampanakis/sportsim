@@ -153,5 +153,28 @@
       result
       (loop (list-insert result (random (1+ i)) i) (1+ i)))))
 
-(define-public (gen-n-teams)
-  (display 1))
+(define-public (gen-round-robin-no-order n)
+  ; See https://en.wikipedia.org/wiki/Round-robin_tournament#Circle_method
+  (define n-1 (1- n))
+  (define n/2 (/ n 2))
+  (define n/2-1 (1- (/ n 2)))
+  (define first-round
+    (let loop-to-gen-first-round ((i 0) (result (list (cons 0 n-1))))
+      (if (= i n/2-1)
+        result
+        (let ((prev (car result)))
+          (loop-to-gen-first-round
+            (1+ i)
+            (cons (cons (1+ (car prev)) (1- (cdr prev))) result))))))
+  (define (cycle number)
+    (cond
+      ((= number 0) 0)
+      ((= number 1) n-1)
+      (else (1- number))))
+  (define (cycle-pair p)
+    (cons (cycle (car p)) (cycle (cdr p))))
+  (let loop-to-gen-other-rounds ((rounds (list first-round)))
+    (if (= (length rounds) n-1)
+      rounds
+      (loop-to-gen-other-rounds
+        (cons (map cycle-pair (car rounds)) rounds)))))
