@@ -156,7 +156,6 @@
 (define-public (gen-round-robin-no-order n)
   ; See https://en.wikipedia.org/wiki/Round-robin_tournament#Circle_method
   (define n-1 (1- n))
-  (define n/2 (/ n 2))
   (define n/2-1 (1- (/ n 2)))
   (define first-round
     (let loop-to-gen-first-round ((i 0) (result (list (cons 0 n-1))))
