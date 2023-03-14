@@ -153,7 +153,7 @@
       result
       (loop (list-insert result (random (1+ i)) i) (1+ i)))))
 
-(define-public (gen-round-robin-no-order n)
+(define-public (gen-round-robin n)
   ; See https://en.wikipedia.org/wiki/Round-robin_tournament#Circle_method
   (define n-1 (1- n))
   (define n/2-1 (1- (/ n 2)))
@@ -170,10 +170,28 @@
       ((= number 0) 0)
       ((= number 1) n-1)
       (else (1- number))))
-  (define (cycle-pair p)
-    (cons (cycle (car p)) (cycle (cdr p))))
   (let loop-to-gen-other-rounds ((rounds (list first-round)))
+    (define (last-home-away number)
+      (let loop ((pairs (car rounds)))
+        (let ((pair (car pairs)))
+          (cond
+            ((= number (car pair)) 'h)
+            ((= number (cdr pair)) 'a)
+            (else (loop (cdr pairs)))))))
+    (define (cycle-pair p)
+      (cons (cycle (car p)) (cycle (cdr p))))
+    (define (switch-pair-if-needed p)
+      ; Try to alternate home-away for each team on each round.
+      (let (
+          (a (last-home-away (car p)))
+          (b (last-home-away (cdr p))))
+        (cond
+          ((and (eqv? a 'h) (eqv? b 'a)) (cons (cdr p) (car p)))
+          ((and (eqv? a 'a) (eqv? b 'h)) p)
+          (else p))))
     (if (= (length rounds) n-1)
       rounds
       (loop-to-gen-other-rounds
-        (cons (map cycle-pair (car rounds)) rounds)))))
+        (cons
+          (map switch-pair-if-needed (map cycle-pair (car rounds)))
+          rounds)))))
