@@ -129,6 +129,14 @@
       (* 60 minute)
       second)))
 
+(define-public (ts->dow ts)
+  (define r1 (floor-quotient ts secs-in-day))
+  (define dow (remainder (+ r1 3) 7))
+  dow)
+
+(define-public (date->dow date)
+  (ts->dow (date->ts date)))
+
 (define-public (add-days date days)
   (ts->date (+ (* days 3600 24) (date->ts date))))
 
@@ -155,6 +163,8 @@
 
 (define-public (gen-round-robin n)
   ; See https://en.wikipedia.org/wiki/Round-robin_tournament#Circle_method
+  (when (<= n 0)
+    (error "gen-round-robin: n should be greater than 0"))
   (define n-1 (1- n))
   (define n/2-1 (1- (/ n 2)))
   (define first-round

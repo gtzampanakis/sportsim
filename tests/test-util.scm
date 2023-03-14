@@ -49,3 +49,10 @@
       ((2 . 3) (1 . 4) (0 . 5))
   ))
 )
+
+(define-public (test-ts->dow test-fns)
+  (test-fns 'assert-equal (ts->dow 0) 3)
+  (test-fns 'assert-equal (ts->dow 86399) 3)
+  (test-fns 'assert-equal (ts->dow 86400) 4)
+  (test-fns 'assert-equal (ts->dow 1677666758) 2)
+)

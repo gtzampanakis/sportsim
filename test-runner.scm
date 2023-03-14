@@ -7,6 +7,7 @@
   test-ts->date
   test-list-insert
   test-gen-rand-perm
+  test-ts->dow
   test-gen-round-robin))
 
 (define (raise-failed-test obj)

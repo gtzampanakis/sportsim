@@ -16,22 +16,39 @@
         (insert-record! db tab-name r)
         (loop (+ i 1))))))
 
-(define (schedule-league-fixtures db)
+(define (schedule-league-fixtures db current-date)
   (define countries (cdr (assoc (list 'table 'country 'data) db)))
   (for-each
     (lambda (r)
-      (schedule-league-fixtures-for-country db (record-attr country id r)))
+      (schedule-league-fixtures-for-country
+        db
+        (record-attr country id r)
+        current-date))
     (query-tab db 'country)))
 
-(define (schedule-league-fixtures-for-country db country-id)
+(define (schedule-league-fixtures-for-country db country-id current-date)
+  (define n-runs 2)
   (define teams
     (query-tab db 'team
       (lambda (r)
         (equal? (record-attr team country-id r) country-id))))
   (define n-teams (length teams))
-  (define matches-per-round (quotient n-teams 2))
-
-  (assert (= (remainder n-teams 2) 0)))
+  (define schedule (gen-round-robin n-teams))
+  (define round-date
+    (let loop ((round-date current-date))
+      (if (= (date->dow round-date) 6)
+        round-date
+        (loop (add-day round-date)))))
+  (let loop-over-runs ((i 0))
+    (when (< i n-runs)
+      (insert-record!
+        db
+        'scheduled-item
+        (make-record scheduled-item (
+          (datetime round-date)
+          (team-home 'foo)
+          (team-away 'bar))))
+      (loop-over-runs (1+ i)))))
 
 (define (main)
   (set! *random-state* (random-state-from-platform))
@@ -58,7 +75,9 @@
     (let* (
         (ntpc (assv-ref conf 'n-teams-per-country))
         (nc (assv-ref conf 'n-countries))
-        (n (* ntpc nc)))
+        (n (* ntpc nc))
+        (countries
+          (query-tab db 'country)))
       (create-entities!
         db
         'team
@@ -66,7 +85,11 @@
         (lambda (i)
           (make-record team (
             (name (number->string i))
-            (country-id (quotient i ntpc)))))))
+            (country-id
+              (record-attr
+                country
+                id
+                (list-ref countries (remainder i nc)))))))))
 
     ; Generate players and assign them to teams.
     (let* (
@@ -98,7 +121,7 @@
                 (and
                   (= month (date-month start-date))
                   (= day (date-day start-date)))
-              (schedule-league-fixtures db))
+              (schedule-league-fixtures db current-date))
           (loop (add-day current-date))))))
 
 ))
