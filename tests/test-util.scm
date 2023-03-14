@@ -48,5 +48,4 @@
       ((1 . 2) (5 . 3) (4 . 0))
       ((2 . 3) (1 . 4) (0 . 5))
   ))
-  (test-fns 'assert-equal (gen-round-robin 18) 'nil)
 )

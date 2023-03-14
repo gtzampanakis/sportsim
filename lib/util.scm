@@ -170,28 +170,32 @@
       ((= number 0) 0)
       ((= number 1) n-1)
       (else (1- number))))
-  (let loop-to-gen-other-rounds ((rounds (list first-round)))
-    (define (last-home-away number)
-      (let loop ((pairs (car rounds)))
-        (let ((pair (car pairs)))
+  (define (cycle-pair p)
+    (cons (cycle (car p)) (cycle (cdr p))))
+  (define (get-switched-pair p)
+    (cons (cdr p) (car p)))
+  (define rounds
+    (let loop-to-gen-other-rounds ((rounds (list first-round)))
+      (define (last-home-away number)
+        (let loop ((pairs (car rounds)))
+          (let ((pair (car pairs)))
+            (cond
+              ((= number (car pair)) 'h)
+              ((= number (cdr pair)) 'a)
+              (else (loop (cdr pairs)))))))
+      (define (get-switch-paired-if-needed p)
+        ; Try to alternate home-away for each team on each round.
+        (let (
+            (a (last-home-away (car p)))
+            (b (last-home-away (cdr p))))
           (cond
-            ((= number (car pair)) 'h)
-            ((= number (cdr pair)) 'a)
-            (else (loop (cdr pairs)))))))
-    (define (cycle-pair p)
-      (cons (cycle (car p)) (cycle (cdr p))))
-    (define (switch-pair-if-needed p)
-      ; Try to alternate home-away for each team on each round.
-      (let (
-          (a (last-home-away (car p)))
-          (b (last-home-away (cdr p))))
-        (cond
-          ((and (eqv? a 'h) (eqv? b 'a)) (cons (cdr p) (car p)))
-          ((and (eqv? a 'a) (eqv? b 'h)) p)
-          (else p))))
-    (if (= (length rounds) n-1)
-      rounds
-      (loop-to-gen-other-rounds
-        (cons
-          (map switch-pair-if-needed (map cycle-pair (car rounds)))
-          rounds)))))
+            ((and (eqv? a 'h) (eqv? b 'a)) (get-switched-pair p))
+            ((and (eqv? a 'a) (eqv? b 'h)) p)
+            (else p))))
+      (if (= (length rounds) n-1)
+        rounds
+        (loop-to-gen-other-rounds
+          (cons
+            (map get-switch-paired-if-needed (map cycle-pair (car rounds)))
+            rounds)))))
+  rounds)
