@@ -33,22 +33,40 @@
       (lambda (r)
         (equal? (record-attr team country-id r) country-id))))
   (define n-teams (length teams))
-  (define schedule (gen-round-robin n-teams))
+  (define rounds (gen-round-robin n-teams))
   (define round-date
     (let loop ((round-date current-date))
       (if (= (date->dow round-date) 6)
         round-date
         (loop (add-day round-date)))))
-  (let loop-over-runs ((i 0))
-    (when (< i n-runs)
-      (insert-record!
-        db
-        'scheduled-item
-        (make-record scheduled-item (
-          (datetime round-date)
-          (team-home 'foo)
-          (team-away 'bar))))
-      (loop-over-runs (1+ i)))))
+  (let loop-over-runs ((i-run 0))
+    (unless (= i-run n-runs)
+      (let loop-over-rounds ((round-date round-date) (rounds rounds))
+        (unless (null? rounds)
+          (let loop-over-pairs ((pairs (car rounds)))
+            (unless (null? pairs)
+              (let* (
+                  (pair
+                    (
+                      (if (= (remainder i-run 2) 0)
+                        identity
+                        get-switched-pair)
+                      (car pairs)))
+                  (team-home (car pair))
+                  (team-away (cdr pair))
+                  (record
+                    (make-record scheduled-item (
+                      (datetime round-date)
+                      (team-home team-home)
+                      (team-away team-away)))))
+                (display record)(newline)
+                (insert-record!
+                  db
+                  'scheduled-item
+                  record)
+                (loop-over-pairs (cdr pairs)))))
+        (loop-over-rounds (add-days round-date 7) (cdr rounds)))
+      (loop-over-runs (1+ i-run))))))
 
 (define (main)
   (set! *random-state* (random-state-from-platform))

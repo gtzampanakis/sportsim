@@ -161,6 +161,9 @@
       result
       (loop (list-insert result (random (1+ i)) i) (1+ i)))))
 
+(define-public (get-switched-pair p)
+  (cons (cdr p) (car p)))
+
 (define-public (gen-round-robin n)
   ; See https://en.wikipedia.org/wiki/Round-robin_tournament#Circle_method
   (when (<= n 0)
@@ -182,8 +185,6 @@
       (else (1- number))))
   (define (cycle-pair p)
     (cons (cycle (car p)) (cycle (cdr p))))
-  (define (get-switched-pair p)
-    (cons (cdr p) (car p)))
   (define rounds
     (let loop-to-gen-other-rounds ((rounds (list first-round)))
       (define (last-home-away number)
