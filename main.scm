@@ -29,17 +29,27 @@
 (define (schedule-league-fixtures-for-country db country-id current-date)
   (define n-runs 2)
   (define teams
-    (query-tab db 'team
-      (lambda (r)
-        (equal? (record-attr team country-id r) country-id))))
-  (define n-teams (length teams))
+    (list->vector
+      (query-tab db 'team
+        (lambda (r)
+          (equal? (record-attr team country-id r) country-id)))))
+  (define n-teams (vector-length teams))
   (define rounds (gen-round-robin n-teams))
   (define round-date
     (let loop ((round-date current-date))
       (if (= (date->dow round-date) 6)
         round-date
         (loop (add-day round-date)))))
-  (let loop-over-runs ((i-run 0))
+  (define competition
+    (make-record competition (
+      (name
+        (string-append
+          "league-"
+          (number->string (date-year current-date))
+          "-"
+          country-id))
+      (country-id country-id))))
+  (let loop-over-runs ((round-date round-date) (i-run 0))
     (unless (= i-run n-runs)
       (let loop-over-rounds ((round-date round-date) (rounds rounds))
         (unless (null? rounds)
@@ -52,13 +62,17 @@
                         identity
                         get-switched-pair)
                       (car pairs)))
-                  (team-home (car pair))
-                  (team-away (cdr pair))
+                  (team-home-index (car pair))
+                  (team-away-index (cdr pair))
+                  (team-home (vector-ref teams team-home-index))
+                  (team-away (vector-ref teams team-away-index))
                   (record
                     (make-record scheduled-item (
                       (datetime round-date)
                       (team-home team-home)
-                      (team-away team-away)))))
+                      (team-away team-away)
+                      (competition-id
+                        (record-attr competition id competition))))))
                 (display record)(newline)
                 (insert-record!
                   db
@@ -66,7 +80,7 @@
                   record)
                 (loop-over-pairs (cdr pairs)))))
         (loop-over-rounds (add-days round-date 7) (cdr rounds)))
-      (loop-over-runs (1+ i-run))))))
+      (loop-over-runs round-date (1+ i-run))))))
 
 (define (main)
   (set! *random-state* (random-state-from-platform))
@@ -87,7 +101,7 @@
         n
         (lambda (i)
           (make-record country (
-            (name (number->string i)))))))
+            (name (string-append "country-" (number->string i))))))))
 
     ; Generate teams and assign them to countries.
     (let* (
@@ -102,7 +116,7 @@
         n
         (lambda (i)
           (make-record team (
-            (name (number->string i))
+            (name (string-append "team-" (number->string i)))
             (country-id
               (record-attr
                 country
@@ -121,7 +135,7 @@
         n
         (lambda (i)
           (make-record player (
-            (name (number->string i))
+            (name (string-append "player-" (number->string i)))
             (dob (date 2004 1 1))
             (team-id (quotient i nppt))
             (ratings #(50 50)))))))

@@ -7,8 +7,9 @@
   '())
 
 (define max-id (expt 2 64))
+
 (define-public (generate-id)
-  (random max-id))
+  (number->string (random max-id) 16))
 
 (define-public (create-tab db tab-name)
   (let ((pair (cons (list 'table tab-name 'data) (make-hash-table))))
