@@ -12,6 +12,6 @@
         ((equal? args '(fields team))
           '(id name country-id))
         ((equal? args '(fields competition))
-          '(id name country-id))
+          '(id name start-year country-id))
         ((equal? args '(fields scheduled-item))
           '(id datetime team-home team-away competition-id))))))

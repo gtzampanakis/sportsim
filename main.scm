@@ -48,7 +48,8 @@
           (number->string (date-year current-date))
           "-"
           country-id))
-      (country-id country-id))))
+      (country-id country-id)
+      (start-year (date-year current-date)))))
   (let loop-over-runs ((round-date round-date) (i-run 0))
     (unless (= i-run n-runs)
       (let loop-over-rounds ((round-date round-date) (rounds rounds))
