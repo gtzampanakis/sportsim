@@ -19,11 +19,37 @@
   (let ((h (cdr (assoc (list 'table tab-name 'data) db))))
     (hash-set! h (vector-ref record 0) record)))
 
+(define-public (compare-values v1 v2)
+  (cond
+    ((and (number? v1) (number? v2))
+      (- v1 v2))
+    ((and (string? v1) (string? v2))
+      (cond
+        ((string=? v1 v2) 0)
+        ((string<? v1 v2) -1)
+        ((string>? v1 v2) 1)))))
+
+(define-public (compare-records r1 r2 field-indices)
+  (if (null? field-indices)
+    #f
+    (let ((field-index (car field-indices)))
+      (define v1 (vector-ref r1 field-index))
+      (define v2 (vector-ref r2 field-index))
+      (define compare-result (compare-values v1 v2))
+      (cond
+        ((= compare-result 0)
+          (compare-records r1 r2 (cdr field-indices)))
+        ((< compare-result 0)
+          #t)
+        (else
+          #f)))))
+
 (define-public query-tab
   (case-lambda
     ((db tab-name) (query-tab db tab-name (lambda (r) #t)))
-    ((db tab-name pred) (query-tab db tab-name pred -1))
-    ((db tab-name pred limit)
+    ((db tab-name pred) (query-tab db tab-name pred '()))
+    ((db tab-name pred order-by) (query-tab db tab-name pred order-by -1))
+    ((db tab-name pred order-by limit)
       (if (= limit 0) '()
         (let (
             (tab (cdr (assoc (list 'table tab-name 'data) db)))
@@ -39,7 +65,12 @@
                     (if (pred v)
                       (begin
                         (set! records (cons v records))
-                        (set! n (+ n 1))
+                        ;(set! records
+                        ;  (merge
+                        ;    (list v)
+                        ;    records
+                        ;    compare))
+                        (set! n (1+ n))
                         (when (and should-check-limit (>= n limit))
                           (abort-to-prompt 'r))))))
                 tab)

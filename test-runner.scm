@@ -2,13 +2,15 @@
 
 (use-modules (tests test-date))
 (use-modules (tests test-util))
+(use-modules (tests test-db))
 
 (define test-suite (list
   test-ts->date
   test-list-insert
   test-gen-rand-perm
   test-ts->dow
-  test-gen-round-robin))
+  test-gen-round-robin
+  test-compare-values))
 
 (define (raise-failed-test obj)
   (raise-exception (cons 'exception-failed-test obj)))
