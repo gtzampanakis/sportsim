@@ -68,7 +68,8 @@
             (tab (cdr (assoc (list 'table tab-name 'data) db)))
             (records '())
             (n 0)
-            (should-check-limit (> limit 0)))
+            (should-check-limit (> limit 0))
+            (field-indices (find-indices order-by (db-meta 'fields tab-name))))
           (call-with-prompt
             'r
             (lambda ()
@@ -77,12 +78,12 @@
                   (let ((k (car handle)) (v (cdr handle)))
                     (if (pred v)
                       (begin
-                        (set! records (cons v records))
-                        ;(set! records
-                        ;  (merge
-                        ;    (list v)
-                        ;    records
-                        ;    compare))
+                        (set! records
+                          (merge
+                            (list v)
+                            records
+                            (lambda (r1 r2)
+                              (less-records r1 r2 field-indices))))
                         (set! n (1+ n))
                         (when (and should-check-limit (>= n limit))
                           (abort-to-prompt 'r))))))
