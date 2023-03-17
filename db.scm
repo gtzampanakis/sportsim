@@ -64,7 +64,7 @@
 
 (define*
     (query-tab
-      db tab-name #:key (pred (lambda (r) #t)) (order-by '()) (limit -1))
+      db tab-name #:key (pred '()) (order-by '()) (limit -1))
   (if (= limit 0) '()
     (let (
         (tab (cdr (assoc (list 'table tab-name 'data) db)))
@@ -78,7 +78,7 @@
           (hash-for-each-handle
             (lambda (handle)
               (let ((k (car handle)) (v (cdr handle)))
-                (if (pred v)
+                (if (or (null? pred) (pred v))
                   (begin
                     (set! records
                       (merge
