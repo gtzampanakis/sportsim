@@ -24,15 +24,17 @@
         db
         (record-attr country id r)
         current-date))
-    (query-tab db 'country)))
+    (query-tab db 'country #:order-by '(name))))
 
 (define (schedule-league-fixtures-for-country db country-id current-date)
   (define n-runs 2)
   (define teams
     (list->vector
       (query-tab db 'team
-        (lambda (r)
-          (equal? (record-attr team country-id r) country-id)))))
+        #:pred
+          (lambda (r)
+            (equal? (record-attr team country-id r) country-id))
+        #:order-by '(name))))
   (define n-teams (vector-length teams))
   (define rounds (gen-round-robin n-teams))
   (define round-date
@@ -110,7 +112,7 @@
         (nc (assv-ref conf 'n-countries))
         (n (* ntpc nc))
         (countries
-          (query-tab db 'country)))
+          (query-tab db 'country #:order-by '(id))))
       (create-entities!
         db
         'team

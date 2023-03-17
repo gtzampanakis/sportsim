@@ -1,5 +1,10 @@
 (define-module (db)
-  #:export (make-record field-to-index fields-to-values record-attr))
+  #:export (
+    make-record
+    field-to-index
+    fields-to-values
+    record-attr
+    query-tab))
 
 (use-modules (tabdef))
 
@@ -57,43 +62,36 @@
     (lambda (obj) (find-index obj ls))
     objs))
 
-(define-public query-tab
-  (case-lambda
-    ((db tab-name) (query-tab db tab-name (lambda (r) #t)))
-    ((db tab-name pred) (query-tab db tab-name pred '()))
-    ((db tab-name pred order-by) (query-tab db tab-name pred order-by -1))
-    ((db tab-name pred order-by limit)
-      (if (= limit 0) '()
-        (let (
-            (tab (cdr (assoc (list 'table tab-name 'data) db)))
-            (records '())
-            (n 0)
-            (should-check-limit (> limit 0))
-            (field-indices (find-indices order-by (db-meta 'fields tab-name))))
-          (call-with-prompt
-            'r
-            (lambda ()
-              (hash-for-each-handle
-                (lambda (handle)
-                  (let ((k (car handle)) (v (cdr handle)))
-                    (if (pred v)
-                      (begin
-                        (set! records
-                          (merge
-                            (list v)
-                            records
-                            (lambda (r1 r2)
-                              (less-records r1 r2 field-indices))))
-                        (set! n (1+ n))
-                        (when (and should-check-limit (>= n limit))
-                          (abort-to-prompt 'r))))))
-                tab)
-              records)
-            (lambda (_) records)))))))
-
-(define-public (query-tab-single db tab-name pred)
-  (define results (query-tab db tab-name pred 1))
-  (if (null? results) '() (car results)))
+(define*
+    (query-tab
+      db tab-name #:key (pred (lambda (r) #t)) (order-by '()) (limit -1))
+  (if (= limit 0) '()
+    (let (
+        (tab (cdr (assoc (list 'table tab-name 'data) db)))
+        (records '())
+        (n 0)
+        (should-check-limit (> limit 0))
+        (field-indices (find-indices order-by (db-meta 'fields tab-name))))
+      (call-with-prompt
+        'r
+        (lambda ()
+          (hash-for-each-handle
+            (lambda (handle)
+              (let ((k (car handle)) (v (cdr handle)))
+                (if (pred v)
+                  (begin
+                    (set! records
+                      (merge
+                        (list v)
+                        records
+                        (lambda (r1 r2)
+                          (less-records r1 r2 field-indices))))
+                    (set! n (1+ n))
+                    (when (and should-check-limit (>= n limit))
+                      (abort-to-prompt 'r))))))
+            tab)
+          records)
+        (lambda (_) records)))))
 
 (define-syntax field-to-index
   (lambda (x)
