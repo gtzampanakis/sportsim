@@ -11,7 +11,9 @@
   test-ts->dow
   test-gen-round-robin
   test-compare-values
-  test-less-records))
+  test-less-records
+  test-find-index
+  test-find-indices))
 
 (define (raise-failed-test obj)
   (raise-exception (cons 'exception-failed-test obj)))

@@ -44,6 +44,19 @@
         (else
           #f)))))
 
+(define-public (find-index obj ls)
+  (let loop ((e 0) (ls ls))
+    (if (null? ls)
+      #f
+      (if (equal? obj (car ls))
+        e
+        (loop (1+ e) (cdr ls))))))
+
+(define-public (find-indices objs ls)
+  (map
+    (lambda (obj) (find-index obj ls))
+    objs))
+
 (define-public query-tab
   (case-lambda
     ((db tab-name) (query-tab db tab-name (lambda (r) #t)))
