@@ -10,7 +10,8 @@
   test-gen-rand-perm
   test-ts->dow
   test-gen-round-robin
-  test-compare-values))
+  test-compare-values
+  test-less-records))
 
 (define (raise-failed-test obj)
   (raise-exception (cons 'exception-failed-test obj)))

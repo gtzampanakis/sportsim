@@ -29,7 +29,7 @@
         ((string<? v1 v2) -1)
         ((string>? v1 v2) 1)))))
 
-(define-public (compare-records r1 r2 field-indices)
+(define-public (less-records r1 r2 field-indices)
   (if (null? field-indices)
     #f
     (let ((field-index (car field-indices)))
@@ -38,7 +38,7 @@
       (define compare-result (compare-values v1 v2))
       (cond
         ((= compare-result 0)
-          (compare-records r1 r2 (cdr field-indices)))
+          (less-records r1 r2 (cdr field-indices)))
         ((< compare-result 0)
           #t)
         (else
