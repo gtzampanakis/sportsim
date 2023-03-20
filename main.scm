@@ -89,78 +89,82 @@
   (set! *random-state* (random-state-from-platform))
   (format #t "Set random seed to ~a\n" (random-state->datum *random-state*))
 
+  (define db
+    (create-tab
+    (create-tab
+    (create-tab
+    (create-tab
+    (create-db)
+    'player)
+    'country)
+    'team)
+    'event))
+
+  ; Generate countries.
+  (let* ((n (assv-ref conf 'n-countries)))
+    (create-entities!
+      db
+      'country
+      n
+      (lambda (i)
+        (make-record country (
+          (name (string-append "country-" (number->string i))))))))
+
+  ; Generate teams and assign them to countries.
   (let* (
-      (db (create-db))
-      (db (create-tab db 'player))
-      (db (create-tab db 'country))
-      (db (create-tab db 'team))
-      (db (create-tab db 'event)))
+      (ntpc (assv-ref conf 'n-teams-per-country))
+      (nc (assv-ref conf 'n-countries))
+      (n (* ntpc nc))
+      (countries
+        (query-tab db 'country #:order-by '(id))))
+    (create-entities!
+      db
+      'team
+      n
+      (lambda (i)
+        (make-record team (
+          (name (string-append "team-" (number->string i)))
+          (country-id
+            (record-attr
+              country
+              id
+              (list-ref countries (remainder i nc)))))))))
 
-    ; Generate countries.
-    (let* ((n (assv-ref conf 'n-countries)))
-      (create-entities!
-        db
-        'country
-        n
-        (lambda (i)
-          (make-record country (
-            (name (string-append "country-" (number->string i))))))))
+  ; Generate players and assign them to teams.
+  (let* (
+      (nppt (assv-ref conf 'n-players-per-team))
+      (ntpc (assv-ref conf 'n-teams-per-country))
+      (nc (assv-ref conf 'n-countries))
+      (n (* nc ntpc nppt)))
+    (create-entities!
+      db
+      'player
+      n
+      (lambda (i)
+        (make-record player (
+          (name (string-append "player-" (number->string i)))
+          (dob (date 2004 1 1))
+          (team-id (quotient i nppt))
+          (ratings #(50 50)))))))
 
-    ; Generate teams and assign them to countries.
-    (let* (
-        (ntpc (assv-ref conf 'n-teams-per-country))
-        (nc (assv-ref conf 'n-countries))
-        (n (* ntpc nc))
-        (countries
-          (query-tab db 'country #:order-by '(id))))
-      (create-entities!
-        db
-        'team
-        n
-        (lambda (i)
-          (make-record team (
-            (name (string-append "team-" (number->string i)))
-            (country-id
-              (record-attr
-                country
-                id
-                (list-ref countries (remainder i nc)))))))))
+  (let (
+      (start-date (assv-ref conf 'start-date))
+      (stop-date (assv-ref conf 'stop-date)))
+    (let loop ((current-date start-date))
+      (when (< (date->ts current-date) (date->ts stop-date))
+        (format #t "Current date: ~a\n" current-date)
+        (let (
+            (month (date-month current-date))
+            (day (date-day current-date)))
+          (when
+              (and
+                (= month (date-month start-date))
+                (= day (date-day start-date)))
+            (schedule-league-fixtures db current-date))
+        (loop (add-day current-date))))))
 
-    ; Generate players and assign them to teams.
-    (let* (
-        (nppt (assv-ref conf 'n-players-per-team))
-        (ntpc (assv-ref conf 'n-teams-per-country))
-        (nc (assv-ref conf 'n-countries))
-        (n (* nc ntpc nppt)))
-      (create-entities!
-        db
-        'player
-        n
-        (lambda (i)
-          (make-record player (
-            (name (string-append "player-" (number->string i)))
-            (dob (date 2004 1 1))
-            (team-id (quotient i nppt))
-            (ratings #(50 50)))))))
+)
 
-    (let (
-        (start-date (assv-ref conf 'start-date))
-        (stop-date (assv-ref conf 'stop-date)))
-      (let loop ((current-date start-date))
-        (when (< (date->ts current-date) (date->ts stop-date))
-          (format #t "Current date: ~a\n" current-date)
-          (let (
-              (month (date-month current-date))
-              (day (date-day current-date)))
-            (when
-                (and
-                  (= month (date-month start-date))
-                  (= day (date-day start-date)))
-              (schedule-league-fixtures db current-date))
-          (loop (add-day current-date))))))
-
-))
-      
 
     ; Make a schedule data structure and fill it up periodically.
 
