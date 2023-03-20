@@ -6,6 +6,9 @@
     record-attr
     query-tab))
 
+(use-modules (srfi srfi-19))
+
+(use-modules (lib util))
 (use-modules (tabdef))
 
 (define-public (create-db)
@@ -32,7 +35,9 @@
       (cond
         ((string=? v1 v2) 0)
         ((string<? v1 v2) -1)
-        ((string>? v1 v2) 1)))))
+        ((string>? v1 v2) 1)))
+    ((and (date? v1) (date? v2))
+      (- (date->ts v1) (date->ts v2)))))
 
 (define-public (less-records r1 r2 field-indices)
   (if (null? field-indices)

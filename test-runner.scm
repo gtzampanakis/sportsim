@@ -11,7 +11,8 @@
   test-ts->dow
   test-gen-round-robin
   test-compare-values
-  test-less-records
+  test-less-records-1
+  test-less-records-2
   test-find-index
   test-find-indices))
 
