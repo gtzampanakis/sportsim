@@ -14,4 +14,13 @@
         ((equal? args '(fields competition))
           '(id name start-year country-id))
         ((equal? args '(fields event))
-          '(id datetime team-home team-away competition-id))))))
+          '(
+            id
+            year
+            month
+            day
+            done?
+            proc
+            team-home
+            team-away
+            competition-id))))))

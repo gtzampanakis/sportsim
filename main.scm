@@ -71,7 +71,10 @@
                   (team-away (vector-ref teams team-away-index))
                   (record
                     (make-record event (
-                      (datetime round-date)
+                      (year (date-year round-date))
+                      (month (date-month round-date))
+                      (day (date-day round-date))
+                      (done? #f)
                       (team-home team-home)
                       (team-away team-away)
                       (competition-id
@@ -99,6 +102,9 @@
     'country)
     'team)
     'event))
+
+  (define start-date (assv-ref conf 'start-date))
+  (define stop-date (assv-ref conf 'stop-date))
 
   ; Generate countries.
   (let* ((n (assv-ref conf 'n-countries)))
@@ -147,21 +153,61 @@
           (team-id (quotient i nppt))
           (ratings #(50 50)))))))
 
-  (let (
-      (start-date (assv-ref conf 'start-date))
-      (stop-date (assv-ref conf 'stop-date)))
-    (let loop ((current-date start-date))
-      (when (< (date->ts current-date) (date->ts stop-date))
-        (format #t "Current date: ~a\n" current-date)
-        (let (
-            (month (date-month current-date))
-            (day (date-day current-date)))
-          (when
-              (and
-                (= month (date-month start-date))
-                (= day (date-day start-date)))
-            (schedule-league-fixtures db current-date))
-        (loop (add-day current-date))))))
+  ;(let (
+  ;    (start-date (assv-ref conf 'start-date))
+  ;    (stop-date (assv-ref conf 'stop-date)))
+  ;  (let loop ((current-date start-date))
+  ;    (when (< (date->ts current-date) (date->ts stop-date))
+  ;      (format #t "Current date: ~a\n" current-date)
+  ;      (let (
+  ;          (month (date-month current-date))
+  ;          (day (date-day current-date)))
+  ;        (when
+  ;            (and
+  ;              (= month (date-month start-date))
+  ;              (= day (date-day start-date)))
+  ;          (schedule-league-fixtures db current-date))
+  ;      (loop (add-day current-date))))))
+
+  (insert-record!
+    db 'event
+    (make-record event (
+      (year (date-year stop-date))
+      (month (date-month stop-date))
+      (day (date-day stop-date))
+      (done? #f)
+      (proc exit))))
+
+  (insert-record!
+    db 'event
+    (make-record event (
+      (month (date-month start-date))
+      (day (date-day start-date))
+      (done? #f)
+      (proc (lambda () (schedule-league-fixtures db))))))
+
+  (define (process-event event)
+    (let ((proc (record-attr event proc event)))
+      (when (procedure? proc)
+        (format #t "Calling ~a" proc)
+        (proc))))
+  
+  (define (process-event-list event-list)
+    (for-each process-event event-list))
+
+  (let loop ()
+    (let (
+        (next-events
+          (query-tab db 'event
+            #:pred
+              (lambda (e)
+                (equal? (record-attr event done? e) #f))
+            #:order-by
+              '(year month day id)
+            #:limit 100)))
+      (when (not (null? next-events))
+        (process-event-list next-events)
+        (loop))))
 
 )
 
