@@ -70,7 +70,7 @@
                   (team-home (vector-ref teams team-home-index))
                   (team-away (vector-ref teams team-away-index))
                   (record
-                    (make-record scheduled-item (
+                    (make-record event (
                       (datetime round-date)
                       (team-home team-home)
                       (team-away team-away)
@@ -79,7 +79,7 @@
                 (display record)(newline)
                 (insert-record!
                   db
-                  'scheduled-item
+                  'event
                   record)
                 (loop-over-pairs (cdr pairs)))))
         (loop-over-rounds (add-days round-date 7) (cdr rounds)))
@@ -94,7 +94,7 @@
       (db (create-tab db 'player))
       (db (create-tab db 'country))
       (db (create-tab db 'team))
-      (db (create-tab db 'scheduled-item)))
+      (db (create-tab db 'event)))
 
     ; Generate countries.
     (let* ((n (assv-ref conf 'n-countries)))
