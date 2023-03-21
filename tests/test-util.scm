@@ -57,10 +57,36 @@
   (test-fns 'assert-equal (ts->dow 1677666758) 2)
 )
 
+(define-public (test-valid-date? test-fns)
+  (test-fns 'assert-true (valid-date? (date 2000 1 1)))
+  (test-fns 'assert-true (valid-date? (date 2000 2 29)))
+  (test-fns 'assert-false (valid-date? (date 2001 2 29)))
+  (test-fns 'assert-true (valid-date? (date 2004 2 29)))
+)
+
 (define-public (test-compare-dates test-fns)
   (test-fns 'assert-equal (compare-dates (date 2000 1 1) (date 2000 1 1)) 0)
   (test-fns 'assert-equal (compare-dates (date 2000 1 1) (date 2001 1 1)) -1)
   (test-fns 'assert-equal (compare-dates (date 2001 1 1) (date 2000 1 1)) 1)
   (test-fns 'assert-equal (compare-dates (date 2001 1 1) (date 2001 1 2)) -1)
   (test-fns 'assert-equal (compare-dates (date 2001 1 2) (date 2001 1 1)) 1)
+)
+
+(define-public (test-add-months test-fns)
+  (test-fns 'assert-true
+    (date=? (add-months (date 2000 1 1) 1) (date 2000 2 1)))
+  (test-fns 'assert-true
+    (date=? (add-months (date 2000 1 20) 1) (date 2000 2 20)))
+  (test-fns 'assert-true
+    (date=? (add-months (date 2000 1 1) -1) (date 1999 12 1)))
+  (test-fns 'assert-true
+    (date=? (add-months (date 2000 1 1) 11) (date 2000 12 1)))
+  (test-fns 'assert-true
+    (date=? (add-months (date 2000 1 1) 12) (date 2001 1 1)))
+  (test-fns 'assert-true
+    (date=? (add-months (date 2000 1 1) -12) (date 1999 1 1)))
+  (test-fns 'assert-true
+    (date=? (add-months (date 2000 1 1) 120) (date 2010 1 1)))
+  (test-fns 'assert-true
+    (date=? (add-months (date 2000 1 30) 1) (date 2000 2 30)))
 )

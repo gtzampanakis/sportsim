@@ -149,6 +149,50 @@
 (define-public (add-day date)
   (add-days date 1))
 
+(define-public (leap? year)
+  (cond
+    ((= (remainder year 400) 0) #t)
+    ((= (remainder year 100) 0) #f)
+    ((= (remainder year 4) 0) #t)
+    (else #f)))
+
+(define-public (valid-date? date-in)
+  (define year (date-year date-in))
+  (define month (date-month date-in))
+  (define day (date-day date-in))
+  (and
+    (not (= year 0))
+    (>= month 1)
+    (<= month 12)
+    (>= day 1)
+    (<=
+      day
+      (cond
+        ((= month 1) 31)
+        ((= month 2) (if (leap? year) 29 28))
+        ((= month 3) 31)
+        ((= month 4) 30)
+        ((= month 5) 31)
+        ((= month 6) 30)
+        ((= month 7) 31)
+        ((= month 8) 31)
+        ((= month 9) 30)
+        ((= month 10) 31)
+        ((= month 11) 30)
+        ((= month 12) 31)))))
+
+  
+
+(define-public (add-months date-in months)
+  (define year (date-year date-in))
+  (define month (date-month date-in))
+  (define day (date-day date-in))
+  (define-values (q r) (floor/ (+ months (1- month)) 12))
+  (define new-month (1+ r))
+  (define new-year (+ year q))
+  (display (date new-year new-month day))(newline)
+  (date new-year new-month day))
+
 (define-public (date y m d)
   (make-date 0 0 0 0 d m y 0))
 

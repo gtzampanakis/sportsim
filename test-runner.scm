@@ -7,6 +7,8 @@
 (define test-suite (list
   test-compare-dates
   test-ts->date
+  test-valid-date?
+  test-add-months
   test-list-insert
   test-gen-rand-perm
   test-ts->dow
@@ -73,7 +75,15 @@
         ((assert-equal)
           (lambda (a b)
             (if (not (equal? a b))
-              (raise-failed-test (list name a b))))))
+              (raise-failed-test (list name a b)))))
+        ((assert-true)
+          (lambda (a)
+            (if (not a)
+              (raise-failed-test (list name a)))))
+        ((assert-false)
+          (lambda (a)
+            (if a
+              (raise-failed-test (list name a))))))
       args)))
 
 (define (run-tests)
