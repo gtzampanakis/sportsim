@@ -87,6 +87,6 @@
     (date=? (add-months (date 2000 1 1) -12) (date 1999 1 1)))
   (test-fns 'assert-true
     (date=? (add-months (date 2000 1 1) 120) (date 2010 1 1)))
-  (test-fns 'assert-true
-    (date=? (add-months (date 2000 1 30) 1) (date 2000 2 30)))
+  (test-fns 'assert-equal (add-months (date 2000 1 30) 1) #f)
+  (test-fns 'assert-equal (add-months (date 2001 8 31) 1) #f)
 )

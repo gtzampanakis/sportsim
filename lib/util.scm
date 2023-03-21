@@ -181,8 +181,6 @@
         ((= month 11) 30)
         ((= month 12) 31)))))
 
-  
-
 (define-public (add-months date-in months)
   (define year (date-year date-in))
   (define month (date-month date-in))
@@ -190,8 +188,8 @@
   (define-values (q r) (floor/ (+ months (1- month)) 12))
   (define new-month (1+ r))
   (define new-year (+ year q))
-  (display (date new-year new-month day))(newline)
-  (date new-year new-month day))
+  (define candidate (date new-year new-month day))
+  (if (valid-date? candidate) candidate #f))
 
 (define-public (date y m d)
   (make-date 0 0 0 0 d m y 0))
