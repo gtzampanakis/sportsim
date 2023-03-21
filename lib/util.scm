@@ -1,4 +1,10 @@
-(define-module (lib util))
+(define-module (lib util)
+  #:export (
+    date=?
+    date<?
+    date<=?
+    date>?
+    date>=?))
 
 (use-modules (srfi srfi-19))
 
@@ -231,3 +237,23 @@
         (if (= diff 0)
           (loop (cdr procs))
           diff)))))
+
+(define-syntax date=?
+  (syntax-rules ()
+    ((_ d1 d2) (= (compare-dates d1 d2) 0))))
+
+(define-syntax date<?
+  (syntax-rules ()
+    ((_ d1 d2) (< (compare-dates d1 d2) 0))))
+
+(define-syntax date<=?
+  (syntax-rules ()
+    ((_ d1 d2) (<= (compare-dates d1 d2) 0))))
+
+(define-syntax date>?
+  (syntax-rules ()
+    ((_ d1 d2) (> (compare-dates d1 d2) 0))))
+
+(define-syntax date>=?
+  (syntax-rules ()
+    ((_ d1 d2) (>= (compare-dates d1 d2) 0))))
