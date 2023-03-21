@@ -5,6 +5,7 @@
 (use-modules (tests test-db))
 
 (define test-suite (list
+  test-compare-dates
   test-ts->date
   test-list-insert
   test-gen-rand-perm

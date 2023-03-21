@@ -210,3 +210,24 @@
             (map get-switch-paired-if-needed (map cycle-pair (car rounds)))
             rounds)))))
   rounds)
+
+(define-public (compare-dates d1 d2)
+  (define procs (list
+    date-nanosecond
+    date-second
+    date-minute
+    date-hour
+    date-day
+    date-month
+    date-year))
+  (let loop ((procs procs))
+    (if (null? procs)
+      0
+      (let* (
+          (proc (car procs))
+          (v1 (proc d1))
+          (v2 (proc d2))
+          (diff (- v1 v2)))
+        (if (= diff 0)
+          (loop (cdr procs))
+          diff)))))

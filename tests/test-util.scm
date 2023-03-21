@@ -56,3 +56,11 @@
   (test-fns 'assert-equal (ts->dow 86400) 4)
   (test-fns 'assert-equal (ts->dow 1677666758) 2)
 )
+
+(define-public (test-compare-dates test-fns)
+  (test-fns 'assert-equal (compare-dates (date 2000 1 1) (date 2000 1 1)) 0)
+  (test-fns 'assert-equal (compare-dates (date 2000 1 1) (date 2001 1 1)) -1)
+  (test-fns 'assert-equal (compare-dates (date 2001 1 1) (date 2000 1 1)) 1)
+  (test-fns 'assert-equal (compare-dates (date 2001 1 1) (date 2001 1 2)) -1)
+  (test-fns 'assert-equal (compare-dates (date 2001 1 2) (date 2001 1 1)) 1)
+)
