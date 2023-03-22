@@ -267,13 +267,13 @@
 
 (define-public (compare-dates d1 d2)
   (define procs (list
-    date-nanosecond
-    date-second
-    date-minute
-    date-hour
-    date-day
+    date-year
     date-month
-    date-year))
+    date-day
+    date-hour
+    date-minute
+    date-second
+    date-nanosecond))
   (let loop ((procs procs))
     (if (null? procs)
       0
