@@ -90,3 +90,20 @@
   (test-fns 'assert-equal (add-months (date 2000 1 30) 1) #f)
   (test-fns 'assert-equal (add-months (date 2001 8 31) 1) #f)
 )
+
+(define-public (test-add-years test-fns)
+  (test-fns 'assert-true
+    (date=? (add-years (date 2000 1 1) 1) (date 2001 1 1)))
+  (test-fns 'assert-equal
+    (add-years (date 2004 2 29) 1) #f)
+)
+
+(define-public (test-next-date-for-schedule test-fns)
+  (define current-date (date 2000 6 1))
+  (test-fns 'assert-true
+    (date=?
+      (next-date-for-schedule current-date 2001 1 1) (date 2001 1 1)))
+  (test-fns 'assert-true
+    (date=?
+      (next-date-for-schedule current-date '() 3 15) (date 2000 3 15)))
+)

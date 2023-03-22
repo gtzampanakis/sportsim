@@ -9,6 +9,8 @@
   test-ts->date
   test-valid-date?
   test-add-months
+  test-add-years
+  ;test-next-date-for-schedule
   test-list-insert
   test-gen-rand-perm
   test-ts->dow

@@ -143,18 +143,15 @@
 (define-public (date->dow date)
   (ts->dow (date->ts date)))
 
-(define-public (add-days date days)
-  (ts->date (+ (* days 3600 24) (date->ts date))))
-
-(define-public (add-day date)
-  (add-days date 1))
-
 (define-public (leap? year)
   (cond
     ((= (remainder year 400) 0) #t)
     ((= (remainder year 100) 0) #f)
     ((= (remainder year 4) 0) #t)
     (else #f)))
+
+(define-public (add-days date days)
+  (ts->date (+ (* days 3600 24) (date->ts date))))
 
 (define-public (valid-date? date-in)
   (define year (date-year date-in))
@@ -190,6 +187,15 @@
   (define new-year (+ year q))
   (define candidate (date new-year new-month day))
   (if (valid-date? candidate) candidate #f))
+
+(define-public (add-years date-in years)
+  (define year (date-year date-in))
+  (define month (date-month date-in))
+  (define day (date-day date-in))
+  (define new-year (+ year years))
+  (define candidate (date new-year month day))
+  (define result (if (valid-date? candidate) candidate #f))
+  result)
 
 (define-public (date y m d)
   (make-date 0 0 0 0 d m y 0))
@@ -299,3 +305,21 @@
 (define-syntax date>=?
   (syntax-rules ()
     ((_ d1 d2) (>= (compare-dates d1 d2) 0))))
+
+(define-public
+    (next-date-for-schedule current-date
+      schedule-year schedule-month schedule-day)
+  (define current-year (date-year current-date))
+  (define current-month (date-month current-date))
+  (define current-day (date-day current-date))
+  (define candidate-year
+    (if (null? schedule-year) current-year schedule-year))
+  (define candidate-month
+    (if (null? schedule-month) current-month schedule-month))
+  (define candidate-day
+    (if (null? schedule-day) current-day schedule-day))
+  (define candidate-date (date candidate-year candidate-month candidate-day))
+  (define result
+    (if (date>=? candidate-date current-date)
+      candidate-date))
+  result)
