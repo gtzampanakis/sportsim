@@ -16,11 +16,11 @@
         ((equal? args '(fields event))
           '(
             id
-            year
-            month
-            day
+            datetime
             done?
-            proc
             team-home
             team-away
-            competition-id))))))
+            scheduled-item-id
+            competition-id))
+        ((equal? args '(fields scheduled-item))
+          '(id year month date proc))))))

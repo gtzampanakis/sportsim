@@ -178,36 +178,36 @@
       (done? #f)
       (proc exit))))
 
-  (insert-record!
-    db 'event
-    (make-record event (
-      (month (date-month start-date))
-      (day (date-day start-date))
-      (done? #f)
-      (proc (lambda () (schedule-league-fixtures db))))))
+  ;(insert-record!
+  ;  db 'scheduled-item
+  ;  (make-record scheduled-item (
+  ;    (month (date-month start-date))
+  ;    (day (date-day start-date))
+  ;    (proc (lambda () (schedule-league-fixtures db))))))
 
-  (define (process-event event)
-    (let ((proc (record-attr event proc event)))
-      (when (procedure? proc)
-        (format #t "Calling ~a" proc)
-        (proc))))
-  
-  (define (process-event-list event-list)
-    (for-each process-event event-list))
+  ;(define (process-event event)
+  ;  (let ((proc (record-attr event proc event)))
+  ;    (when (procedure? proc)
+  ;      (format #t "Calling ~a" proc)
+  ;      (proc))))
+  ;
+  ;(define (process-event-list event-list current-date)
+  ;  (for-each process-event event-list))
 
-  (let loop ()
-    (let (
-        (next-events
-          (query-tab db 'event
-            #:pred
-              (lambda (e)
-                (equal? (record-attr event done? e) #f))
-            #:order-by
-              '(year month day id)
-            #:limit 100)))
-      (when (not (null? next-events))
-        (process-event-list next-events)
-        (loop))))
+  ;(let loop (current-date start-date)
+  ;  (let (
+  ;      (next-events
+  ;        (query-tab db 'event
+  ;          #:pred
+  ;            (lambda (e)
+  ;              (equal? (record-attr event done? e) #f))
+  ;          #:order-by
+  ;            '(year month day id)
+  ;          #:limit 100)))
+  ;    (when (not (null? next-events))
+  ;      (process-event-list next-events)
+  ;      (loop))
+  ;    (loop (ts->date (+ (date->ts current-date) 1)))))
 
 )
 

@@ -192,7 +192,8 @@
   (define year (date-year date-in))
   (define month (date-month date-in))
   (define day (date-day date-in))
-  (define new-year (+ year years))
+  (define straddle-zero-year? (and (< year 0) (>= (+ year years) 0)))
+  (define new-year (+ year (+ years (if straddle-zero-year? 1 0))))
   (define candidate (date new-year month day))
   (define result (if (valid-date? candidate) candidate #f))
   result)
@@ -306,20 +307,41 @@
   (syntax-rules ()
     ((_ d1 d2) (>= (compare-dates d1 d2) 0))))
 
+(define (date-matches? date-in year month day)
+  (and
+    (or (null? year) (= (date-year date-in) year))
+    (or (null? month) (= (date-month date-in) month))
+    (or (null? day) (= (date-day date-in) day))))
+
+(define-public (max-date-that-matches year month day)
+  (cond
+    ((null? year) #f)
+    ((and (not (null? month)) (not (null? day))) (date year month day))
+    ((and (not (null? month)) (null? day))
+      (add-days (add-months (date year month 1) 1) -1))
+    ((and (null? month) (not (null? day)))
+      (date year 12 day))
+    ((and (null? month) (null? day))
+      (date year 12 31))))
+
 (define-public
-    (next-date-for-schedule current-date
+    (next-date-for-schedule as-of-date
       schedule-year schedule-month schedule-day)
-  (define current-year (date-year current-date))
-  (define current-month (date-month current-date))
-  (define current-day (date-day current-date))
-  (define candidate-year
-    (if (null? schedule-year) current-year schedule-year))
-  (define candidate-month
-    (if (null? schedule-month) current-month schedule-month))
-  (define candidate-day
-    (if (null? schedule-day) current-day schedule-day))
-  (define candidate-date (date candidate-year candidate-month candidate-day))
+
+  (define as-of-year (date-year as-of-date))
+  (define as-of-month (date-month as-of-date))
+  (define as-of-day (date-day as-of-date))
+
+  (define candidate-date (add-days as-of-date 1))
+
   (define result
-    (if (date>=? candidate-date current-date)
-      candidate-date))
+    (if
+        (date-matches? candidate-date
+          schedule-year schedule-month schedule-day)
+      candidate-date
+      (next-date-for-schedule
+        (add-days candidate-date 1)
+        schedule-year schedule-month schedule-day)))
+
+  (display result)(newline)
   result)

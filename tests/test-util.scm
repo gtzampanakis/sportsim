@@ -96,14 +96,36 @@
     (date=? (add-years (date 2000 1 1) 1) (date 2001 1 1)))
   (test-fns 'assert-equal
     (add-years (date 2004 2 29) 1) #f)
+  (test-fns 'assert-true
+    (date=? (add-years (date -1 1 1) 1) (date 1 1 1)))
+  (test-fns 'assert-true
+    (date=? (add-years (date -10 1 1) 100) (date 91 1 1)))
+)
+
+(define-public (test-max-date-that-matches test-fns)
+  (test-fns 'assert-true
+    (date=? (max-date-that-matches 2000 1 1) (date 2000 1 1)))
+  (test-fns 'assert-true
+    (date=? (max-date-that-matches 2000 2 '()) (date 2000 2 29)))
+  (test-fns 'assert-true
+    (date=? (max-date-that-matches 2004 2 '()) (date 2004 2 29)))
+  (test-fns 'assert-true
+    (date=? (max-date-that-matches 2100 2 '()) (date 2100 2 28)))
+  (test-fns 'assert-true
+    (date=? (max-date-that-matches 2100 '() 29) (date 2100 12 29)))
+  (test-fns 'assert-true
+    (date=? (max-date-that-matches 2100 '() '()) (date 2100 12 31)))
 )
 
 (define-public (test-next-date-for-schedule test-fns)
-  (define current-date (date 2000 6 1))
+  (define as-of-date (date 2000 6 1))
   (test-fns 'assert-true
     (date=?
-      (next-date-for-schedule current-date 2001 1 1) (date 2001 1 1)))
+      (next-date-for-schedule as-of-date '() '() '()) (date 2000 6 2)))
   (test-fns 'assert-true
     (date=?
-      (next-date-for-schedule current-date '() 3 15) (date 2000 3 15)))
+      (next-date-for-schedule as-of-date 2000 '() '()) (date 2000 6 2)))
+  (test-fns 'assert-true
+    (date=?
+      (next-date-for-schedule as-of-date 1999 '() '()) (date 2000 6 2)))
 )

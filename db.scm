@@ -104,7 +104,7 @@
       ((_ field-to-find (field ...))
         #'(field-to-index field-to-find (field ...) 0))
       ((_ field-to-find () i)
-        #''nil)
+        #''())
       ((_ field-to-find (field1 field2 ...) i)
         (if (equal? #'field-to-find #'field1)
           #'i
@@ -115,7 +115,7 @@
   (lambda (x)
     (syntax-case x ()
       ((_ field ())
-        #''nil)
+        #''())
       ((_ field ((k1 v1) . tail))
         (if (equal? (syntax->datum #'field) (syntax->datum #'k1))
           #'v1
