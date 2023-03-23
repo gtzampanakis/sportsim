@@ -8,14 +8,10 @@
 
 (use-modules (srfi srfi-19))
 
-(define-syntax thread-last
-; example: (thread-last cons '() 2 3 5)
-; returns: (2 3 5)
-  (syntax-rules ()
-    ((_ proc init arg)
-      (proc arg init))
-    ((_ proc init arg arg* ...)
-      (thread-last proc (thread-last proc init arg* ...) arg))))
+(define-public (display-list ls)
+  (for-each
+    (lambda (e) (display e)(newline))
+    ls))
 
 (define (div-irregular a bs)
   ; Returns (r1 . r2)
@@ -152,6 +148,9 @@
 
 (define-public (add-days date days)
   (ts->date (+ (* days 3600 24) (date->ts date))))
+
+(define-public (add-day date)
+  (add-days date 1))
 
 (define-public (valid-date? date-in)
   (define year (date-year date-in))
@@ -333,11 +332,11 @@
     (let loop ((as-of-date as-of-date))
       (if (and
             (date? max-date-for-schedule)
-            (date>=? as-of-date max-date-for-schedule))
+            (date>? as-of-date max-date-for-schedule))
         #f
-        (let ((candidate-date (add-days as-of-date 1)))
+        (let ()
           (if (date-matches?
-                candidate-date schedule-year schedule-month schedule-day)
-            candidate-date
-            (loop candidate-date))))))
+                as-of-date schedule-year schedule-month schedule-day)
+            as-of-date
+            (loop (add-day as-of-date)))))))
   result)

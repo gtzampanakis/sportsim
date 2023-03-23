@@ -88,6 +88,20 @@
         (loop-over-rounds (add-days round-date 7) (cdr rounds)))
       (loop-over-runs round-date (1+ i-run))))))
 
+(define (schedule-next-event db record as-of-date)
+  (define next-date
+    (next-date-for-schedule as-of-date
+      (record-attr scheduled-item year record)
+      (record-attr scheduled-item month record)
+      (record-attr scheduled-item day record)))
+  (when next-date
+    (insert-record!
+      db 'event
+      (make-record event (
+        (datetime next-date)
+        (done? #f)
+        (scheduled-item-id (record-attr scheduled-item id record)))))))
+
 (define (main)
   (set! *random-state* (random-state-from-platform))
   (format #t "Set random seed to ~a\n" (random-state->datum *random-state*))
@@ -97,11 +111,13 @@
     (create-tab
     (create-tab
     (create-tab
+    (create-tab
     (create-db)
     'player)
     'country)
     'team)
-    'event))
+    'event)
+    'scheduled-item))
 
   (define start-date (assv-ref conf 'start-date))
   (define stop-date (assv-ref conf 'stop-date))
@@ -170,29 +186,21 @@
   ;      (loop (add-day current-date))))))
 
   (insert-record!
-    db 'event
-    (make-record event (
+    db 'scheduled-item
+    (make-record scheduled-item (
       (year (date-year stop-date))
       (month (date-month stop-date))
       (day (date-day stop-date))
-      (done? #f)
       (proc exit))))
-
-  ;(insert-record!
-  ;  db 'scheduled-item
-  ;  (make-record scheduled-item (
-  ;    (month (date-month start-date))
-  ;    (day (date-day start-date))
-  ;    (proc (lambda () (schedule-league-fixtures db))))))
-
-  ;(define (process-event event)
-  ;  (let ((proc (record-attr event proc event)))
-  ;    (when (procedure? proc)
-  ;      (format #t "Calling ~a" proc)
-  ;      (proc))))
-  ;
-  ;(define (process-event-list event-list current-date)
-  ;  (for-each process-event event-list))
+  
+  (insert-record!
+    db 'scheduled-item
+    (make-record scheduled-item (
+      (month (date-month start-date))
+      (day (date-day start-date))
+      (proc
+        (lambda (current-date)
+          (schedule-league-fixtures db current-date))))))
 
   ;(let loop (current-date start-date)
   ;  (let (
@@ -209,8 +217,18 @@
   ;      (loop))
   ;    (loop (ts->date (+ (date->ts current-date) 1)))))
 
-)
+  ;(display (query-tab db 'scheduled-item))(newline)
 
+  (for-each
+    (lambda (r) (schedule-next-event db r start-date))
+    (query-tab db
+      'scheduled-item
+      #:order-by '(id)))
+
+  (display-list
+    (query-tab db 'event #:order-by '(datetime)))
+
+)
 
     ; Make a schedule data structure and fill it up periodically.
 

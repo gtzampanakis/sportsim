@@ -23,4 +23,4 @@
             scheduled-item-id
             competition-id))
         ((equal? args '(fields scheduled-item))
-          '(id year month date proc))))))
+          '(id year month day proc))))))

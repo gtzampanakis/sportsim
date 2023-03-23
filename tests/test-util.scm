@@ -121,10 +121,10 @@
   (define as-of-date (date 2000 6 1))
   (test-fns 'assert-true
     (date=?
-      (next-date-for-schedule as-of-date '() '() '()) (date 2000 6 2)))
+      (next-date-for-schedule as-of-date '() '() '()) (date 2000 6 1)))
   (test-fns 'assert-true
     (date=?
-      (next-date-for-schedule as-of-date 2000 '() '()) (date 2000 6 2)))
+      (next-date-for-schedule as-of-date 2000 '() '()) (date 2000 6 1)))
   (test-fns 'assert-equal
     (next-date-for-schedule as-of-date 1999 '() '()) #f)
   (test-fns 'assert-equal
