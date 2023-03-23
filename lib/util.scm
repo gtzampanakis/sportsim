@@ -327,21 +327,17 @@
 (define-public
     (next-date-for-schedule as-of-date
       schedule-year schedule-month schedule-day)
-
-  (define as-of-year (date-year as-of-date))
-  (define as-of-month (date-month as-of-date))
-  (define as-of-day (date-day as-of-date))
-
-  (define candidate-date (add-days as-of-date 1))
-
+  (define max-date-for-schedule
+    (max-date-that-matches schedule-year schedule-month schedule-day))
   (define result
-    (if
-        (date-matches? candidate-date
-          schedule-year schedule-month schedule-day)
-      candidate-date
-      (next-date-for-schedule
-        (add-days candidate-date 1)
-        schedule-year schedule-month schedule-day)))
-
-  (display result)(newline)
+    (let loop ((as-of-date as-of-date))
+      (if (and
+            (date? max-date-for-schedule)
+            (date>=? as-of-date max-date-for-schedule))
+        #f
+        (let ((candidate-date (add-days as-of-date 1)))
+          (if (date-matches?
+                candidate-date schedule-year schedule-month schedule-day)
+            candidate-date
+            (loop candidate-date))))))
   result)

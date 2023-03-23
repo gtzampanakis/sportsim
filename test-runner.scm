@@ -10,7 +10,7 @@
   test-valid-date?
   test-add-months
   test-add-years
-  ;test-next-date-for-schedule
+  test-next-date-for-schedule
   test-max-date-that-matches
   test-list-insert
   test-gen-rand-perm
