@@ -17,6 +17,7 @@
           '(
             id
             datetime
+            proc
             done?
             team-home
             team-away

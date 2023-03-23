@@ -88,19 +88,26 @@
         (loop-over-rounds (add-days round-date 7) (cdr rounds)))
       (loop-over-runs round-date (1+ i-run))))))
 
-(define (schedule-next-event db record as-of-date)
+(define (schedule-next-event db scheduled-item-record as-of-date)
   (define next-date
     (next-date-for-schedule as-of-date
-      (record-attr scheduled-item year record)
-      (record-attr scheduled-item month record)
-      (record-attr scheduled-item day record)))
+      (record-attr scheduled-item year scheduled-item-record)
+      (record-attr scheduled-item month scheduled-item-record)
+      (record-attr scheduled-item day scheduled-item-record)))
   (when next-date
     (insert-record!
       db 'event
       (make-record event (
         (datetime next-date)
         (done? #f)
-        (scheduled-item-id (record-attr scheduled-item id record)))))))
+        (proc (record-attr scheduled-item proc scheduled-item-record))
+        (scheduled-item-id
+          (record-attr scheduled-item id scheduled-item-record)))))))
+
+(define (process-event event-record)
+  (define proc (record-attr event proc event-record))
+  (display proc)(newline)
+  (record-set-attr! event done? event-record #t))
 
 (define (main)
   (set! *random-state* (random-state-from-platform))
@@ -202,21 +209,6 @@
         (lambda (current-date)
           (schedule-league-fixtures db current-date))))))
 
-  ;(let loop (current-date start-date)
-  ;  (let (
-  ;      (next-events
-  ;        (query-tab db 'event
-  ;          #:pred
-  ;            (lambda (e)
-  ;              (equal? (record-attr event done? e) #f))
-  ;          #:order-by
-  ;            '(year month day id)
-  ;          #:limit 100)))
-  ;    (when (not (null? next-events))
-  ;      (process-event-list next-events)
-  ;      (loop))
-  ;    (loop (ts->date (+ (date->ts current-date) 1)))))
-
   ;(display (query-tab db 'scheduled-item))(newline)
 
   (for-each
@@ -225,8 +217,27 @@
       'scheduled-item
       #:order-by '(id)))
 
-  (display-list
-    (query-tab db 'event #:order-by '(datetime)))
+  ;(display-list
+  ;  (query-tab db 'event #:order-by '(datetime)))
+
+  (let loop ((current-date start-date))
+    (let (
+        (next-events
+          (query-tab db 'event
+            #:pred
+              (lambda (e)
+                (equal? (record-attr event done? e) #f))
+            #:order-by
+              '(datetime)
+            #:limit 100)))
+      (if (null? next-events)
+        #f
+        (let ()
+          (for-each
+            (lambda (e)
+              (process-event e))
+            next-events)
+          (loop current-date)))))
 
 )
 

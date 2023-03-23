@@ -4,6 +4,7 @@
     field-to-index
     fields-to-values
     record-attr
+    record-set-attr!
     query-tab))
 
 (use-modules (srfi srfi-19))
@@ -148,3 +149,12 @@
             (fields
               (datum->syntax #'tab (db-meta 'fields (syntax->datum #'tab)))))
           #`(vector-ref record (field-to-index field #,fields)))))))
+
+(define-syntax record-set-attr!
+  (lambda (x)
+    (syntax-case x ()
+      ((_ tab field record obj)
+        (let (
+            (fields
+              (datum->syntax #'tab (db-meta 'fields (syntax->datum #'tab)))))
+          #`(vector-set! record (field-to-index field #,fields) obj))))))
