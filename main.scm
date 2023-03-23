@@ -106,6 +106,7 @@
 
 (define (process-event event-record)
   (define proc (record-attr event proc event-record))
+  ;(proc event-record)
   (display proc)(newline)
   (record-set-attr! event done? event-record #t))
 
@@ -206,8 +207,9 @@
       (month (date-month start-date))
       (day (date-day start-date))
       (proc
-        (lambda (current-date)
-          (schedule-league-fixtures db current-date))))))
+        (lambda (event-record)
+          (schedule-league-fixtures
+            db (record-attr event datetime event-record)))))))
 
   ;(display (query-tab db 'scheduled-item))(newline)
 
