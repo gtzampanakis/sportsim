@@ -79,7 +79,6 @@
                       (team-away team-away)
                       (competition-id
                         (record-attr competition id competition))))))
-                (display record)(newline)
                 (insert-record!
                   db
                   'event
@@ -106,7 +105,7 @@
 
 (define (process-event event-record)
   (define proc (record-attr event proc event-record))
-  ;(proc event-record)
+  (proc event-record)
   (display proc)(newline)
   (record-set-attr! event done? event-record #t))
 
