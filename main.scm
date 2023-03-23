@@ -71,9 +71,7 @@
                   (team-away (vector-ref teams team-away-index))
                   (record
                     (make-record event (
-                      (year (date-year round-date))
-                      (month (date-month round-date))
-                      (day (date-day round-date))
+                      (datetime round-date)
                       (done? #f)
                       (team-home team-home)
                       (team-away team-away)
