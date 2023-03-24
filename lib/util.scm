@@ -268,16 +268,17 @@
             rounds)))))
   rounds)
 
+(define compare-dates-procs (list
+  date-year
+  date-month
+  date-day
+  date-hour
+  date-minute
+  date-second
+  date-nanosecond))
+
 (define-public (compare-dates d1 d2)
-  (define procs (list
-    date-year
-    date-month
-    date-day
-    date-hour
-    date-minute
-    date-second
-    date-nanosecond))
-  (let loop ((procs procs))
+  (let loop ((procs compare-dates-procs))
     (if (null? procs)
       0
       (let* (
