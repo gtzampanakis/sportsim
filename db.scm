@@ -71,33 +71,37 @@
 (define*
     (query-tab
       db tab-name #:key (pred '()) (order-by '()) (limit -1))
-  (if (= limit 0) '()
-    (let (
-        (tab (cdr (assoc (list 'table tab-name 'data) db)))
-        (records '())
-        (n 0)
-        (should-check-limit (> limit 0))
-        (field-indices (find-indices order-by (db-meta 'fields tab-name))))
-      (call-with-prompt
-        'r
-        (lambda ()
-          (hash-for-each-handle
-            (lambda (handle)
-              (let ((k (car handle)) (v (cdr handle)))
-                (if (or (null? pred) (pred v))
-                  (begin
-                    (set! records
-                      (merge
-                        (list v)
-                        records
-                        (lambda (r1 r2)
-                          (less-records r1 r2 field-indices))))
-                    (set! n (1+ n))
-                    (when (and should-check-limit (>= n limit))
-                      (abort-to-prompt 'r))))))
-            tab)
-          records)
-        (lambda (_) records)))))
+  (let (
+      (tab (cdr (assoc (list 'table tab-name 'data) db)))
+      (records '())
+      (n 0)
+      (field-indices (find-indices order-by (db-meta 'fields tab-name))))
+    (hash-for-each-handle
+      (lambda (handle)
+        (let ((k (car handle)) (v (cdr handle)))
+          (if (or (null? pred) (pred v))
+            (begin
+              (set! records
+                (merge
+                  (list v)
+                  records
+                  (lambda (r1 r2)
+                    (less-records r1 r2 field-indices))))
+              (set! n (1+ n))))))
+      tab)
+    (cond
+      ((null? records) records)
+      ((= limit -1) records)
+      (else (list-head records limit)))))
+
+(define-public (query-tab-by-id db tab-name id)
+  (define records
+    (query-tab db tab-name
+      #:pred (lambda (r) (equal? (vector-ref r 0) id))
+      #:limit 1))
+  (if (null? records)
+    #f
+    (car records)))
 
 (define-syntax field-to-index
   (lambda (x)

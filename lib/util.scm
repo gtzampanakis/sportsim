@@ -8,6 +8,9 @@
 
 (use-modules (srfi srfi-19))
 
+(define-public (display-line obj)
+  (display obj)(newline))
+
 (define-public (display-list ls)
   (for-each
     (lambda (e) (display e)(newline))

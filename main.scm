@@ -17,6 +17,7 @@
         (loop (+ i 1))))))
 
 (define (schedule-league-fixtures db current-date)
+  (display-line "start: schedule-league-fixtures")
   (define countries (cdr (assoc (list 'table 'country 'data) db)))
   (for-each
     (lambda (r)
@@ -25,6 +26,10 @@
         (record-attr country id r)
         current-date))
     (query-tab db 'country #:order-by '(name))))
+
+(define (do-matchup db event-record)
+  (display-line "*** Doing matchup:")
+  (display-line event-record))
 
 (define (schedule-league-fixtures-for-country db country-id current-date)
   (define n-runs 2)
@@ -73,6 +78,7 @@
                     (make-record event (
                       (datetime round-date)
                       (done? #f)
+                      (proc do-matchup)
                       (team-home team-home)
                       (team-away team-away)
                       (competition-id
@@ -101,10 +107,17 @@
         (scheduled-item-id
           (record-attr scheduled-item id scheduled-item-record)))))))
 
-(define (process-event event-record)
+(define (process-event db event-record)
   (define proc (record-attr event proc event-record))
-  (proc event-record)
-  (display proc)(newline)
+  (proc db event-record)
+  (let (
+      (scheduled-item-id (record-attr event scheduled-item-id event-record)))
+    (when scheduled-item-id
+      (let (
+          (scheduled-item
+            (query-tab-by-id db 'scheduled-item scheduled-item-id)))
+        (display-line "Scheduled-item:")
+        (display-line scheduled-item))))
   (record-set-attr! event done? event-record #t))
 
 (define (main)
@@ -174,22 +187,6 @@
           (team-id (quotient i nppt))
           (ratings #(50 50)))))))
 
-  ;(let (
-  ;    (start-date (assv-ref conf 'start-date))
-  ;    (stop-date (assv-ref conf 'stop-date)))
-  ;  (let loop ((current-date start-date))
-  ;    (when (< (date->ts current-date) (date->ts stop-date))
-  ;      (format #t "Current date: ~a\n" current-date)
-  ;      (let (
-  ;          (month (date-month current-date))
-  ;          (day (date-day current-date)))
-  ;        (when
-  ;            (and
-  ;              (= month (date-month start-date))
-  ;              (= day (date-day start-date)))
-  ;          (schedule-league-fixtures db current-date))
-  ;      (loop (add-day current-date))))))
-
   (insert-record!
     db 'scheduled-item
     (make-record scheduled-item (
@@ -204,20 +201,15 @@
       (month (date-month start-date))
       (day (date-day start-date))
       (proc
-        (lambda (event-record)
+        (lambda (db event-record)
           (schedule-league-fixtures
             db (record-attr event datetime event-record)))))))
-
-  ;(display (query-tab db 'scheduled-item))(newline)
 
   (for-each
     (lambda (r) (schedule-next-event db r start-date))
     (query-tab db
       'scheduled-item
       #:order-by '(id)))
-
-  ;(display-list
-  ;  (query-tab db 'event #:order-by '(datetime)))
 
   (let loop ((current-date start-date))
     (let (
@@ -228,13 +220,15 @@
                 (equal? (record-attr event done? e) #f))
             #:order-by
               '(datetime)
-            #:limit 100)))
+            ; Keep the limit at 1 so that an event can generate new events and
+            ; those events will be done in correct order.
+            #:limit 1)))
       (if (null? next-events)
         #f
         (let ()
           (for-each
             (lambda (e)
-              (process-event e))
+              (process-event db e))
             next-events)
           (loop current-date)))))
 
