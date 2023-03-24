@@ -24,6 +24,9 @@
   (let ((pair (cons (list 'table tab-name 'data) (make-hash-table))))
     (cons pair db)))
 
+;(define-public (create-index db tab-name field-names)
+;  )
+
 (define-public (insert-record! db tab-name record)
   (let ((h (cdr (assoc (list 'table tab-name 'data) db))))
     (hash-set! h (vector-ref record 0) record)))
@@ -95,13 +98,8 @@
       (else (list-head records limit)))))
 
 (define-public (query-tab-by-id db tab-name id)
-  (define records
-    (query-tab db tab-name
-      #:pred (lambda (r) (equal? (vector-ref r 0) id))
-      #:limit 1))
-  (if (null? records)
-    #f
-    (car records)))
+  (define tab (cdr (assoc (list 'table tab-name 'data) db)))
+  (hash-ref tab id))
 
 (define-syntax field-to-index
   (lambda (x)
