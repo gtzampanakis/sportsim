@@ -3,6 +3,7 @@
 (use-modules (srfi srfi-9))
 (use-modules (srfi srfi-19))
 (use-modules (ice-9 format))
+(use-modules (ice-9 time))
 
 (use-modules (lib util))
 (use-modules (conf))
@@ -116,8 +117,10 @@
       (let (
           (scheduled-item
             (query-tab-by-id db 'scheduled-item scheduled-item-id)))
-        (display-line "Scheduled-item:")
-        (display-line scheduled-item))))
+        (when scheduled-item
+          (begin
+            (display-line "Scheduled-item:")
+            (display-line scheduled-item))))))
   (record-set-attr! event done? event-record #t))
 
 (define (main)
@@ -125,6 +128,7 @@
   (format #t "Set random seed to ~a\n" (random-state->datum *random-state*))
 
   (define db
+    (create-index
     (create-tab
     (create-tab
     (create-tab
@@ -135,7 +139,8 @@
     'country)
     'team)
     'event)
-    'scheduled-item))
+    'scheduled-item)
+    'event '(datetime)))
 
   (define start-date (assv-ref conf 'start-date))
   (define stop-date (assv-ref conf 'stop-date))
@@ -214,7 +219,7 @@
   (let loop ((current-date start-date))
     (let (
         (next-events
-          (query-tab db 'event
+          (time (query-tab db 'event
             #:pred
               (lambda (e)
                 (equal? (record-attr event done? e) #f))
@@ -222,7 +227,7 @@
               '(datetime)
             ; Keep the limit at 1 so that an event can generate new events and
             ; those events will be done in correct order.
-            #:limit 1)))
+            #:limit 1))))
       (if (null? next-events)
         #f
         (let ()

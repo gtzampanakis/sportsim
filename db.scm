@@ -24,8 +24,12 @@
   (let ((pair (cons (list 'table tab-name 'data) (make-hash-table))))
     (cons pair db)))
 
-;(define-public (create-index db tab-name field-names)
-;  )
+(define-public (create-index db tab-name fields)
+  (define pair
+    (cons
+      (list 'table tab-name 'index fields)
+      (make-vector 10 #f)))
+  (cons pair db))
 
 (define-public (insert-record! db tab-name record)
   (let ((h (cdr (assoc (list 'table tab-name 'data) db))))
