@@ -5,11 +5,14 @@
     (cond
       ((equal? command 'make)
         (bst-make))
-      ((equal? command 'add)
-        (apply bst-add (append (list less-proc) args))))))
+      ((equal? command 'add!)
+        (apply bst-add! (append (list less-proc) args))))))
 
 (define (bst-make)
   '())
+
+(define-public (bst-head bst)
+  (car bst))
 
 (define-public (bst-left bst)
   (car (cdr bst)))
@@ -17,13 +20,18 @@
 (define-public (bst-right bst)
   (cdr (cdr bst)))
 
-(define (bst-add less-proc bst k)
-  (if (null? bst)
-    (cons k (cons bst bst))
-    (let* (
-        (c (car bst))
-        (u (less-proc k c))
-        (lr-proc (if u bst-left bst-right)))
-      (if u
-        (cons c (cons (bst-add less-proc (bst-left bst) k) '()))
-        (cons c (cons '() (bst-add less-proc (bst-right bst) k)))))))
+(define-public (bst-add! less-proc bst-input k)
+  (if (null? bst-input)
+    (cons k (cons '() '()))
+    (let loop ((bst bst-input))
+      (if (less-proc k (car bst))
+        (if (null? (cadr bst))
+          (begin
+            (set-car! (cdr bst) (cons k (cons '() '())))
+            bst-input)
+          (loop (cadr bst)))
+        (if (null? (cddr bst))
+          (begin
+            (set-cdr! (cdr bst) (cons k (cons '() '())))
+            bst-input)
+          (loop (cddr bst)))))))

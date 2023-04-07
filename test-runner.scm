@@ -22,7 +22,7 @@
   ;test-less-records-2
   ;test-find-index
   ;test-find-indices
-  test-foo))
+  test-bst))
 
 (define (raise-failed-test obj)
   (raise-exception (cons 'exception-failed-test obj)))
