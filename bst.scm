@@ -9,7 +9,7 @@
         (apply bst-add! (append (list less-proc) args))))))
 
 (define (bst-make)
-  '())
+  (cons '() (cons '() '())))
 
 (define-public (bst-head bst)
   (car bst))
@@ -21,17 +21,13 @@
   (cdr (cdr bst)))
 
 (define-public (bst-add! less-proc bst-input k)
-  (if (null? bst-input)
-    (cons k (cons '() '()))
+  (if (null? (car bst-input))
+    (set-car! bst-input k)
     (let loop ((bst bst-input))
       (if (less-proc k (car bst))
         (if (null? (cadr bst))
-          (begin
-            (set-car! (cdr bst) (cons k (cons '() '())))
-            bst-input)
+          (set-car! (cdr bst) (cons k (cons '() '())))
           (loop (cadr bst)))
         (if (null? (cddr bst))
-          (begin
-            (set-cdr! (cdr bst) (cons k (cons '() '())))
-            bst-input)
+          (set-cdr! (cdr bst) (cons k (cons '() '())))
           (loop (cddr bst)))))))
