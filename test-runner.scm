@@ -24,6 +24,8 @@
   ;test-find-indices
   ;test-bst-valid?
   test-bst-add!
+  test-bst-min
+  test-bst-max
   ;test-bst-includes?
 ))
 

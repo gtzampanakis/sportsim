@@ -7,12 +7,16 @@
         (bst-make))
       ((equal? command 'add!)
         (apply bst-add! (append (list less-proc) args)))
+      ((equal? command 'min)
+        (apply bst-min (append (list less-proc) args)))
+      ((equal? command 'max)
+        (apply bst-max (append (list less-proc) args)))
       ((equal? command 'valid?)
         (apply bst-valid? (append (list less-proc) args)))
       ((equal? command 'includes?)
         (apply bst-includes? (append (list less-proc) args)))
-      ((equal? command 'delete!)
-        (apply bst-delete! (append (list less-proc) args))))))
+      ((equal? command 'delete-head!)
+        (apply bst-delete-head! (append (list less-proc) args))))))
 
 
 (define (bst-make)
@@ -69,3 +73,34 @@
           (if (null? (cddr bst))
             #f
             (loop (cddr bst))))))))
+
+;(define-public (bst-delete! less-proc bst-input k)
+;  (let loop ((bst bst-input))
+;    (unless (null? (car bst))
+;      (if (less-proc k (car bst))
+;        (unless (null? (cadr bst))
+;          (loop (cadr bst)))
+;        (if (less-proc (car bst) k)
+;          (unless (null? (cddr bst))
+;            (loop (cddr bst)))
+;          ; k is equal to (car bst)
+
+;(define-public (bst-delete-head! less-proc bst-input k)
+;  (let loop ((bst bst-input))
+;    (
+
+(define-public (bst-min less-proc bst-input)
+  (let loop ((bst bst-input))
+    (if (null? (car bst))
+      '()
+      (if (null? (cadr bst))
+        (car bst)
+        (loop (cadr bst))))))
+
+(define-public (bst-max less-proc bst-input)
+  (let loop ((bst bst-input))
+    (if (null? (car bst))
+      '()
+      (if (null? (cddr bst))
+        (car bst)
+        (loop (cddr bst))))))
