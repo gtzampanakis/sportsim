@@ -13,10 +13,12 @@
         (apply bst-max (append (list less-proc) args)))
       ((equal? command 'valid?)
         (apply bst-valid? (append (list less-proc) args)))
+      ((equal? command 'member)
+        (apply bst-member (append (list less-proc) args)))
       ((equal? command 'includes?)
         (apply bst-includes? (append (list less-proc) args)))
-      ((equal? command 'delete-head!)
-        (apply bst-delete-head! (append (list less-proc) args))))))
+      ((equal? command 'delete!)
+        (apply bst-delete! (append (list less-proc) args))))))
 
 
 (define (bst-make)
@@ -60,34 +62,22 @@
           (set-cdr! (cdr bst) (cons k (cons '() '())))
           (loop (cddr bst)))))))
 
-(define-public (bst-includes? less-proc bst-input k)
+(define-public (bst-member less-proc bst-input k)
   (let loop ((bst bst-input))
     (if (null? (car bst))
-      #f
+      '()
       (if (less-proc k (car bst))
         (if (null? (cadr bst))
-          #f
+          '()
           (loop (cadr bst)))
         (if (not (less-proc (car bst) k))
-          #t
+          bst
           (if (null? (cddr bst))
-            #f
+            '()
             (loop (cddr bst))))))))
 
-;(define-public (bst-delete! less-proc bst-input k)
-;  (let loop ((bst bst-input))
-;    (unless (null? (car bst))
-;      (if (less-proc k (car bst))
-;        (unless (null? (cadr bst))
-;          (loop (cadr bst)))
-;        (if (less-proc (car bst) k)
-;          (unless (null? (cddr bst))
-;            (loop (cddr bst)))
-;          ; k is equal to (car bst)
-
-;(define-public (bst-delete-head! less-proc bst-input k)
-;  (let loop ((bst bst-input))
-;    (
+(define-public (bst-includes? less-proc bst-input k)
+  (not (null? (bst-member less-proc bst-input k))))
 
 (define-public (bst-min less-proc bst-input)
   (let loop ((bst bst-input))
@@ -104,3 +94,16 @@
       (if (null? (cddr bst))
         (car bst)
         (loop (cddr bst))))))
+
+(define-public (bst-delete! less-proc bst-input k)
+  (define bst (bst-member less-proc bst-input k))
+  (unless (null? bst)
+    (if (null? (cadr bst))
+      (if (null? (cddr bst))
+        (set-car! bst '())
+        (let ((right-min (bst-min less-proc (cddr bst))))
+          (set-car! bst right-min)
+          (bst-delete! less-proc (cddr bst) right-min)))
+      (let ((left-max (bst-max less-proc (cadr bst))))
+        (set-car! bst left-max)
+        (bst-delete! less-proc (cadr bst) left-max)))))

@@ -22,11 +22,12 @@
   ;test-less-records-2
   ;test-find-index
   ;test-find-indices
-  ;test-bst-valid?
+  test-bst-valid?
   test-bst-add!
   test-bst-min
   test-bst-max
-  ;test-bst-includes?
+  test-bst-includes?
+  test-bst-delete!
 ))
 
 (define (raise-failed-test obj)
