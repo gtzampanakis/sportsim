@@ -24,15 +24,6 @@
 (define (bst-make)
   (cons '() (cons '() '())))
 
-(define-public (bst-head bst)
-  (car bst))
-
-(define-public (bst-left bst)
-  (car (cdr bst)))
-
-(define-public (bst-right bst)
-  (cdr (cdr bst)))
-
 (define-public (bst-valid? less-proc bst)
   (if (null? (car bst))
     #t

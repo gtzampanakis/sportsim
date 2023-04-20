@@ -22,12 +22,12 @@
   (test-fns 'assert-equal bst '(50 () . ()))
 
   (bst-proc 'add! bst 25)
-  (test-fns 'assert-equal (bst-left bst) '(25 ()))
-  (test-fns 'assert-equal (bst-right bst) '())
+  (test-fns 'assert-equal (cadr bst) '(25 ()))
+  (test-fns 'assert-equal (cddr bst) '())
 
   (bst-proc 'add! bst 75)
-  (test-fns 'assert-equal (bst-right bst) '(75 ()))
-  (test-fns 'assert-equal (bst-left bst) '(25 ()))
+  (test-fns 'assert-equal (cddr bst) '(75 ()))
+  (test-fns 'assert-equal (cadr bst) '(25 ()))
 )
 
 (define-public (test-bst-min test-fns)
