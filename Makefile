@@ -38,5 +38,5 @@ compiled/tests/test-util.scm.go: tests/test-util.scm
 run: all
 	guile --no-auto-compile -L . main.scm
 
-run-tests: all
+test: all
 	guile --no-auto-compile -L . test-runner.scm
