@@ -85,25 +85,19 @@
 
 (define-public (test-bst-delete! test-fns)
   (define bst-proc (make-bst-proc <))
+  (define ns '(1 2 0 -1 3 -2 8 10 -5))
   (define bst (bst-proc 'make))
-  ;(define ns '(1 2 0 -1 3 -2 8 10 -5))
-  (define ns '(1 2))
   (for-each
-    (lambda (n)
-      (bst-proc 'add! bst n))
-    ns)
-  (display bst)(newline)
-  (for-each
-    (lambda (n)
-      (bst-proc 'delete! bst n)
-      (test-fns 'assert-equal (bst-proc 'includes? bst n) #f))
-    ns)
-  (display bst)(newline)
-  ;(for-each
-  ;  (lambda (n)
-  ;    (bst-proc 'add! bst n))
-  ;  ns)
-  (bst-proc 'add! bst 1)
-  (display bst)(newline)
-  (bst-proc 'add! bst 2)
+    (lambda (_)
+      (for-each
+        (lambda (n)
+          (bst-proc 'add! bst n))
+        ns)
+      (for-each
+        (lambda (n)
+          (bst-proc 'delete! bst n)
+          (test-fns 'assert-equal (bst-proc 'includes? bst n) #f))
+        ns)
+      (test-fns 'assert-equal bst (bst-proc 'make)))
+    '(1 2))
 )
