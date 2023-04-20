@@ -6,7 +6,8 @@ all:\
 	compiled/main.scm.go\
 	compiled/test-runner.scm.go\
 	compiled/tests/test-date.scm.go\
-	compiled/tests/test-util.scm.go
+	compiled/tests/test-util.scm.go\
+	compiled/tests/test-bst.scm.go
 
 clean:
 	rm -rf compiled/*
@@ -34,6 +35,9 @@ compiled/tests/test-date.scm.go: tests/test-date.scm
 
 compiled/tests/test-util.scm.go: tests/test-util.scm
 	guild compile -L . tests/test-util.scm -o compiled/tests/test-util.scm.go
+
+compiled/tests/test-bst.scm.go: tests/test-bst.scm
+	guild compile -L . tests/test-bst.scm -o compiled/tests/test-bst.scm.go
 
 run: all
 	guile --no-auto-compile -L . main.scm
