@@ -1,6 +1,7 @@
 (define-module (bst))
 
-(define-public (make-bst-proc less-proc)
+(define-public (make-bst-proc bare-less-proc)
+  (define less-proc (make-less-proc bare-less-proc))
   (lambda (command . args)
     (cond
       ((equal? command 'make)
@@ -20,6 +21,9 @@
       ((equal? command 'delete!)
         (apply bst-delete! (append (list less-proc) args))))))
 
+(define (make-less-proc bare-less-proc)
+  (lambda (ls1 ls2)
+    (bare-less-proc (car ls1) (car ls2))))
 
 (define (bst-make)
   (cons '() (cons '() '())))
@@ -32,16 +36,17 @@
       (or
         (null? (cadr bst))
         (and
-          (less-proc (cadr bst) (car bst))
+          (less-proc (caadr bst) (car bst))
           (bst-valid? less-proc (cadr bst))))
       ; right side
       (or
         (null? (cddr bst))
         (and
-          (not (less-proc (cddr bst) (car bst)))
+          (not (less-proc (caddr bst) (car bst)))
           (bst-valid? less-proc (cddr bst)))))))
 
-(define-public (bst-add! less-proc bst-input k)
+(define-public (bst-add! less-proc bst-input bare-k)
+  (define k (cons bare-k 1))
   (if (null? (car bst-input))
     (set-car! bst-input k)
     (let loop ((bst bst-input))
@@ -110,3 +115,31 @@
           (if (leaf? left)
             (set-car! (cdr bst) '())
             (bst-delete! less-proc left left-max)))))))
+
+(define-public (obj-as-string obj)
+  (call-with-output-string
+    (lambda (port)
+      (write obj port))))
+
+(define-public (bst-pretty-print bst-input)
+  (define result-port (open-output-string))
+  (define display-to-result (lambda (obj) (display obj result-port)))
+
+  (let loop ((bst bst-input) (index 1) (parent-index 0))
+    (if (null? (car bst))
+      (display-to-result '())
+      (begin
+        (display-to-result index)
+        (display-to-result " ")
+        (display-to-result parent-index)
+        (display-to-result " ")
+        (display-to-result (car bst))
+        (unless (null? (cadr bst))
+          (display-to-result "\n")
+          (loop (cadr bst) (+ index 1) index))
+        (unless (null? (cddr bst))
+          (display-to-result "\n")
+          (loop (cddr bst) (+ index 2) index)))))
+
+  (display (get-output-string result-port))
+  (newline))
