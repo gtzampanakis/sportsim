@@ -1,7 +1,24 @@
 (define-module (bst))
 
-(define-public (make-bst-proc bare-less-proc)
-  (define less-proc (make-less-proc bare-less-proc))
+#|
+A bst is a pair whose car is either the empty list or a pair (head-payload .
+size) and whose cdr is a pair of bsts, empty lists or a combination thereof.
+
+The case where the car is the empty list only occurs for a bst of size zero.
+
+Cheat-sheet:
+
+(car bst) returns either the empty list or a pair.
+
+If (car bst) returns a pair:
+(caar bst) returns the payload.
+(cdar bst) returns the size.
+
+(cadr bst) returns either the empty list or a bst.
+(cddr bst) returns either the empty list or a bst.
+|#
+
+(define-public (make-bst-proc less-proc)
   (lambda (command . args)
     (cond
       ((equal? command 'make)
@@ -19,11 +36,9 @@
       ((equal? command 'includes?)
         (apply bst-includes? (append (list less-proc) args)))
       ((equal? command 'delete!)
-        (apply bst-delete! (append (list less-proc) args))))))
-
-(define (make-less-proc bare-less-proc)
-  (lambda (ls1 ls2)
-    (bare-less-proc (car ls1) (car ls2))))
+        (apply bst-delete! (append (list less-proc) args)))
+      ((equal? command 'size)
+        (apply bst-size (append (list less-proc) args))))))
 
 (define (bst-make)
   (cons '() (cons '() '())))
@@ -36,37 +51,54 @@
       (or
         (null? (cadr bst))
         (and
-          (less-proc (caadr bst) (car bst))
+          (less-proc (caaadr bst) (caar bst))
           (bst-valid? less-proc (cadr bst))))
       ; right side
       (or
         (null? (cddr bst))
         (and
-          (not (less-proc (caddr bst) (car bst)))
+          (not (less-proc (caaddr bst) (caar bst)))
           (bst-valid? less-proc (cddr bst)))))))
 
-(define-public (bst-add! less-proc bst-input bare-k)
-  (define k (cons bare-k 1))
+(define-public (bst-size less-proc bst)
+  (if (null? (car bst))
+    0
+    (cdar bst)))
+
+(define (inc-size-bsts! bsts)
+  (let loop ((bsts bsts))
+    (unless (null? bsts)
+      (let ((bst (car bsts)))
+        (set-cdr! (car bst) (1+ (cdar bst)))
+        (loop (cdr bsts))))))
+
+(define-public (bst-add! less-proc bst-input k)
   (if (null? (car bst-input))
-    (set-car! bst-input k)
-    (let loop ((bst bst-input))
-      (if (less-proc k (car bst))
-        (if (null? (cadr bst))
-          (set-car! (cdr bst) (cons k (cons '() '())))
-          (loop (cadr bst)))
-        (if (null? (cddr bst))
-          (set-cdr! (cdr bst) (cons k (cons '() '())))
-          (loop (cddr bst)))))))
+    (begin
+      (set-car! bst-input (cons k 1)))
+    (let loop ((bst bst-input) (seen '()))
+      (let ((seen (cons bst seen)))
+        (if (less-proc k (caar bst))
+          (if (null? (cadr bst))
+            (begin
+              (inc-size-bsts! seen)
+              (set-car! (cdr bst) (cons (cons k 1) (cons '() '()))))
+            (loop (cadr bst) seen))
+          (if (null? (cddr bst))
+            (begin
+              (inc-size-bsts! seen)
+              (set-cdr! (cdr bst) (cons (cons k 1) (cons '() '()))))
+            (loop (cddr bst) seen)))))))
 
 (define-public (bst-member less-proc bst-input k)
   (let loop ((bst bst-input))
     (if (null? (car bst))
       '()
-      (if (less-proc k (car bst))
+      (if (less-proc k (caar bst))
         (if (null? (cadr bst))
           '()
           (loop (cadr bst)))
-        (if (not (less-proc (car bst) k))
+        (if (not (less-proc (caar bst) k))
           bst
           (if (null? (cddr bst))
             '()
@@ -80,7 +112,7 @@
     (if (null? (car bst))
       '()
       (if (null? (cadr bst))
-        (car bst)
+        (caar bst)
         (loop (cadr bst))))))
 
 (define-public (bst-max less-proc bst-input)
@@ -88,7 +120,7 @@
     (if (null? (car bst))
       '()
       (if (null? (cddr bst))
-        (car bst)
+        (caar bst)
         (loop (cddr bst))))))
 
 (define (leaf? bst)

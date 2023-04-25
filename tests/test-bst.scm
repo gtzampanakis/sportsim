@@ -37,22 +37,6 @@
   (pp)
 )
 
-(define-public (test-bst-add! test-fns)
-  (define bst-proc (make-bst-proc <))
-  (define bst (bst-proc 'make))
-
-  (bst-proc 'add! bst 50)
-  (test-fns 'assert-equal bst '(50 () . ()))
-
-  (bst-proc 'add! bst 25)
-  (test-fns 'assert-equal (cadr bst) '(25 ()))
-  (test-fns 'assert-equal (cddr bst) '())
-
-  (bst-proc 'add! bst 75)
-  (test-fns 'assert-equal (cddr bst) '(75 ()))
-  (test-fns 'assert-equal (cadr bst) '(25 ()))
-)
-
 (define-public (test-bst-min test-fns)
   (define bst-proc (make-bst-proc <))
   (define bst (bst-proc 'make))
@@ -105,6 +89,18 @@
   (bst-proc 'add! bst -1)
   (assert-true (bst-includes? -1))
 )
+
+(define-public (test-bst-size test-fns)
+  (define bst-proc (make-bst-proc <))
+  (define bst (bst-proc 'make))
+  (define ns0 '(3 2 1 5 4 6 0 7 -1 5 3))
+  (let loop ((ns ns0))
+    (unless (null? ns)
+      (bst-proc 'add! bst (car ns))
+      (test-fns 'assert-equal
+        (bst-proc 'size bst)
+        (+ 1 (- (length ns0) (length ns))))
+      (loop (cdr ns)))))
 
 (define-public (test-bst-delete! test-fns)
   (define bst-proc (make-bst-proc <))
