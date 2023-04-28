@@ -25,6 +25,8 @@ If (car bst) returns a pair:
         (bst-make))
       ((equal? command 'add!)
         (apply bst-add! (append (list less-proc) args)))
+      ((equal? command 'min-max)
+        (apply bst-min-max (append (list less-proc) args)))
       ((equal? command 'min)
         (apply bst-min (append (list less-proc) args)))
       ((equal? command 'max)
@@ -41,24 +43,33 @@ If (car bst) returns a pair:
         (apply bst-size (append (list less-proc) args))))))
 
 (define (bst-make)
-  (cons '() (cons '() '())))
+  '())
 
-(define-public (bst-valid? less-proc bst)
-  (if (null? (car bst))
-    #t
-    (and
-      ; left side
-      (or
-        (null? (cadr bst))
+(define-public (bst-valid? less-proc bst-input)
+  (let loop ((bst bst-input))
+    (or
+      (null? bst)
+      (let
+        (
+          (left-bst (cadr bst))
+          (right-bst (cddr bst))
+          (payload (caar bst))
+          (size (cdar bst)))
         (and
-          (less-proc (caaadr bst) (caar bst))
-          (bst-valid? less-proc (cadr bst))))
-      ; right side
-      (or
-        (null? (cddr bst))
-        (and
-          (not (less-proc (caaddr bst) (caar bst)))
-          (bst-valid? less-proc (cddr bst)))))))
+          (or
+            (null? left-bst)
+            (less-proc (caar left-bst) payload))
+          (or
+            (null? right-bst)
+            (not (less-proc (caar right-bst) payload)))
+          (=
+            size
+            (+
+              1
+              (if (null? left-bst) 0 (cdar left-bst))
+              (if (null? right-bst) 0 (cdar right-bst))))
+          (loop left-bst)
+          (loop right-bst))))))
 
 (define-public (bst-size less-proc bst)
   (if (null? (car bst))
@@ -73,22 +84,38 @@ If (car bst) returns a pair:
         (loop (cdr bsts))))))
 
 (define-public (bst-add! less-proc bst-input k)
-  (if (null? (car bst-input))
+  (define (bst-size-one)
+    (cons (cons k 1) (cons '() '())))
+
+  (define (inc-bsts-seen! bsts-seen)
+    (let loop ((bsts bsts-seen))
+      (unless (null? bsts)
+        (let ((bst (car bsts)))
+          (set-cdr! (car bst) (1+ (cdar bst)))
+          (loop (cdr bsts))))))
+
+  (if (null? bst-input)
+    (bst-size-one)
     (begin
-      (set-car! bst-input (cons k 1)))
-    (let loop ((bst bst-input) (seen '()))
-      (let ((seen (cons bst seen)))
-        (if (less-proc k (caar bst))
-          (if (null? (cadr bst))
-            (begin
-              (inc-size-bsts! seen)
-              (set-car! (cdr bst) (cons (cons k 1) (cons '() '()))))
-            (loop (cadr bst) seen))
-          (if (null? (cddr bst))
-            (begin
-              (inc-size-bsts! seen)
-              (set-cdr! (cdr bst) (cons (cons k 1) (cons '() '()))))
-            (loop (cddr bst) seen)))))))
+      (let loop ((bst bst-input) (bsts-seen '()))
+        (let
+          (
+            (left-bst (cadr bst))
+            (right-bst (cddr bst))
+            (payload (caar bst))
+            (size (cdar bst)))
+          (if (less-proc k payload)
+            (if (null? left-bst)
+              (begin
+                (inc-bsts-seen! (cons bst bsts-seen))
+                (set-car! (cdr bst) (bst-size-one)))
+              (loop left-bst (cons bst bsts-seen)))
+            (if (null? right-bst)
+              (begin
+                (inc-bsts-seen! (cons bst bsts-seen))
+                (set-cdr! (cdr bst) (bst-size-one)))
+              (loop right-bst (cons bst bsts-seen))))))
+      bst-input)))
 
 (define-public (bst-member less-proc bst-input k)
   (let loop ((bst bst-input))
@@ -107,13 +134,20 @@ If (car bst) returns a pair:
 (define-public (bst-includes? less-proc bst-input k)
   (not (null? (bst-member less-proc bst-input k))))
 
-(define-public (bst-min less-proc bst-input)
-  (let loop ((bst bst-input))
-    (if (null? (car bst))
-      '()
-      (if (null? (cadr bst))
+(define-public (bst-min-max less-proc bst-input min-max)
+  (define proc (if (equal? min-max 'min) cadr cddr))
+  (if (null? bst-input)
+    '()
+    (let loop ((bst bst-input))
+      (if (null? (proc bst))
         (caar bst)
-        (loop (cadr bst))))))
+        (loop (proc bst))))))
+
+(define-public (bst-min less-proc bst-input)
+  (bst-min-max less-proc bst-input 'min))
+
+(define-public (bst-max less-proc bst-input)
+  (bst-min-max less-proc bst-input 'max))
 
 (define-public (bst-max less-proc bst-input)
   (let loop ((bst bst-input))
@@ -129,24 +163,26 @@ If (car bst) returns a pair:
     (null? (cadr bst))
     (null? (cddr bst))))
 
-(define-public (bst-delete! less-proc bst-input k)
-  (define bst (bst-member less-proc bst-input k))
-  (unless (null? bst)
-    (let ((left (cadr bst)) (right (cddr bst)))
-      (if (null? left)
-        (if (null? right)
-          (set-car! bst '())
-          (let ((right-min (bst-min less-proc right)))
-            (set-car! bst right-min)
-            (if (leaf? right)
-            ; If subbst is a leaf remove it altogether.
-              (set-cdr! (cdr bst) '())
-              (bst-delete! less-proc right right-min))))
-        (let ((left-max (bst-max less-proc left)))
-          (set-car! bst left-max)
-          (if (leaf? left)
-            (set-car! (cdr bst) '())
-            (bst-delete! less-proc left left-max)))))))
+;(define-public (bst-delete! less-proc bst-input k-input)
+;  (unless (null? (car bst-input))
+;    (let loop ((bst bst-input) (parent-bst '()) (dir-from-parent '()))
+;      (let ((k (caar bst)) (left-bst (cadr bst)) (right-bst (cddr bst)))
+;        (if (less-proc k-input k)
+;          ; check left
+;          (unless (null? left-bst)
+;            (loop left-bst bst 'left))
+;          (if (less-proc k k-input)
+;            ; check right
+;            (unless (null? right-bst)
+;              (loop right-bst bst 'right))
+;            ; equality
+;            (if (null? parent-bst)
+;              (set-car! bst '())
+;              (if (equal? dir-from-parent 'left)
+;                (if (leaf? bst)
+;                  ; delete altogether
+;                  (set-car! (cdr parent-bst) '())
+
 
 (define-public (obj-as-string obj)
   (call-with-output-string
