@@ -6,22 +6,22 @@
 (use-modules (tests test-db))
 
 (define test-suite (list
-  ;test-compare-dates
-  ;test-ts->date
-  ;test-valid-date?
-  ;test-add-months
-  ;test-add-years
-  ;test-next-date-for-schedule
-  ;test-max-date-that-matches
-  ;test-list-insert
-  ;test-gen-rand-perm
-  ;test-ts->dow
-  ;test-gen-round-robin
-  ;test-compare-values
-  ;test-less-records-1
-  ;test-less-records-2
-  ;test-find-index
-  ;test-find-indices
+  test-compare-dates
+  test-ts->date
+  test-valid-date?
+  test-add-months
+  test-add-years
+  test-next-date-for-schedule
+  test-max-date-that-matches
+  test-list-insert
+  test-gen-rand-perm
+  test-ts->dow
+  test-gen-round-robin
+  test-compare-values
+  test-less-records-1
+  test-less-records-2
+  test-find-index
+  test-find-indices
   test-bst-valid?
   test-bst-size
   test-bst-min-max
