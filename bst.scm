@@ -84,11 +84,17 @@ Cheat-sheet:
         (set-cdr! (car bst) (1+ (cdar bst)))
         (loop (cdr bsts))))))
 
-;(define-public (bst-walk less-proc bst-input k)
-;  (if (null? bst-input)
-;    (delay '())
-;    (let loop ((bst bst-input))
-;      (delay (cons bst 
+(define-public (bst-walk less-proc bst-input k)
+  (let loop ((bst bst-input))
+    (cons
+      bst
+      (if (null? bst)
+        '()
+        (if (less-proc k payload)
+          (lambda () (loop (cadr bst)))
+          (if (less-proc payload k)
+            (lambda () (loop (cddr bst)))
+            '()))))))
 
 (define-public (bst-add! less-proc bst-input k)
   (define (bst-size-one)
