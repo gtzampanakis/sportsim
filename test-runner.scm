@@ -25,7 +25,7 @@
   test-bst-valid?
   test-bst-size
   test-bst-min-max
-  ;test-bst-includes?
+  test-bst-includes?
   ;test-bst-delete!
 ))
 

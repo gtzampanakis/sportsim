@@ -41,7 +41,9 @@ Cheat-sheet:
       ((equal? command 'delete!)
         (apply bst-delete! (append (list less-proc) args)))
       ((equal? command 'size)
-        (apply bst-size (append (list less-proc) args))))))
+        (apply bst-size (append (list less-proc) args)))
+      ((equal? command 'walk)
+        (apply bst-walk (append (list less-proc) args))))))
 
 (define (bst-make)
   '())
@@ -90,11 +92,29 @@ Cheat-sheet:
       bst
       (if (null? bst)
         '()
-        (if (less-proc k payload)
-          (lambda () (loop (cadr bst)))
-          (if (less-proc payload k)
-            (lambda () (loop (cddr bst)))
-            '()))))))
+        (let ((payload (caar bst)))
+          (if (less-proc k payload)
+            (lambda () (loop (cadr bst)))
+            (if (less-proc payload k)
+              (lambda () (loop (cddr bst)))
+              '())))))))
+
+(define-public (equal less-proc a b)
+  (and
+    (not (less-proc a b))
+    (not (less-proc b a))))
+
+(define-public (bst-includes? less-proc bst-input k)
+  (let loop ((p (bst-walk less-proc bst-input k)))
+    (let ((bst (car p)) (next (cdr p)))
+      (if (null? bst)
+        #f
+        (let ((payload (caar bst)))
+          (if (equal less-proc payload k)
+            #t
+            (if (null? next)
+              #f
+              (loop (next)))))))))
 
 (define-public (bst-add! less-proc bst-input k)
   (define (bst-size-one)
@@ -143,9 +163,6 @@ Cheat-sheet:
           (if (null? (cddr bst))
             '()
             (loop (cddr bst))))))))
-
-(define-public (bst-includes? less-proc bst-input k)
-  (not (null? (bst-member less-proc bst-input k))))
 
 (define-public (bst-min-max less-proc bst-input min-max)
   (define proc (if (equal? min-max 'min) cadr cddr))

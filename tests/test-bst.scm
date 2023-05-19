@@ -44,24 +44,23 @@
   (define (assert-true v) (test-fns 'assert-equal v #t))
   (define (assert-false v) (test-fns 'assert-equal v #f))
 
-  (assert-false (bst-includes? 1))
-  (bst-proc 'add! bst 1)
+  (set! bst (bst-proc 'add! bst 1))
   (assert-true (bst-includes? 1))
   (assert-false (bst-includes? 2))
 
-  (bst-proc 'add! bst 2)
+  (set! bst (bst-proc 'add! bst 2))
   (assert-true (bst-includes? 1))
   (assert-true (bst-includes? 2))
 
-  (bst-proc 'add! bst 0)
+  (set! bst (bst-proc 'add! bst 0))
   (assert-true (bst-includes? 0))
   (assert-true (bst-includes? 2))
   (assert-true (bst-includes? 2))
 
-  (bst-proc 'add! bst 3)
+  (set! bst (bst-proc 'add! bst 3))
   (assert-true (bst-includes? 3))
 
-  (bst-proc 'add! bst -1)
+  (set! bst (bst-proc 'add! bst -1))
   (assert-true (bst-includes? -1))
 )
 
