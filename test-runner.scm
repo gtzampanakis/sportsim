@@ -26,7 +26,7 @@
   test-bst-size
   test-bst-min-max
   test-bst-includes?
-  ;test-bst-delete!
+  test-bst-delete!
 ))
 
 (define (raise-failed-test obj)

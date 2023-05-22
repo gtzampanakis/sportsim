@@ -15,8 +15,8 @@ Cheat-sheet:
 (caar bst) returns the payload.
 (cdar bst) returns the size.
 
-(cadr bst) returns either the empty list or a bst.
-(cddr bst) returns either the empty list or a bst.
+(cadr bst) returns either the empty list or a bst (left-bst).
+(cddr bst) returns either the empty list or a bst (right-bst).
 |#
 
 (define-public (make-bst-proc less-proc)
@@ -185,26 +185,54 @@ Cheat-sheet:
     (null? (cadr bst))
     (null? (cddr bst))))
 
-;(define-public (bst-delete! less-proc bst-input k-input)
-;  (unless (null? (car bst-input))
-;    (let loop ((bst bst-input) (parent-bst '()) (dir-from-parent '()))
-;      (let ((k (caar bst)) (left-bst (cadr bst)) (right-bst (cddr bst)))
-;        (if (less-proc k-input k)
-;          ; check left
-;          (unless (null? left-bst)
-;            (loop left-bst bst 'left))
-;          (if (less-proc k k-input)
-;            ; check right
-;            (unless (null? right-bst)
-;              (loop right-bst bst 'right))
-;            ; equality
-;            (if (null? parent-bst)
-;              (set-car! bst '())
-;              (if (equal? dir-from-parent 'left)
-;                (if (leaf? bst)
-;                  ; delete altogether
-;                  (set-car! (cdr parent-bst) '())
-
+(define-public (bst-delete! less-proc bst-input k-input)
+  (define (sub-1-from-path path)
+    (let loop ((path path))
+      (unless (null? path)
+        (let ((bst (car path)))
+          (set-cdr! (car bst) (1- (cdar bst)))
+          (loop (cdr path))))))
+  (let loop
+    (
+      (bst bst-input)
+      (parent '())
+      (parent-dir '())
+      (path '()))
+    (if (null? bst)
+      bst-input
+      (let ((payload (caar bst)) (left-bst (cadr bst)) (right-bst (cddr bst)))
+        (if (less-proc k-input payload)
+          (loop left-bst bst 'left (cons bst path))
+          (if (less-proc payload k-input)
+            (loop right-bst bst 'right (cons bst path))
+            (if (null? left-bst)
+              (if (null? right-bst)
+                (if (null? parent)
+                  '()
+                  (begin
+                    (if (equal? parent-dir 'left)
+                      (set-car! (cdr parent) '())
+                      (set-cdr! (cdr parent) '()))
+                    (sub-1-from-path path)
+                    bst-input))
+                (let ((min-right (bst-min less-proc right-bst)))
+                  (let
+                    (
+                      (right-bst-with-deleted
+                        (bst-delete! less-proc right-bst min-right)))
+                    (set-cdr! (cdr bst) right-bst-with-deleted)
+                    (set-car! (car bst) min-right)
+                    (sub-1-from-path (cons bst path))
+                    bst-input)))
+              (let ((max-left (bst-max less-proc left-bst)))
+                (let
+                  (
+                    (left-bst-with-deleted
+                      (bst-delete! less-proc left-bst max-left)))
+                  (set-car! (cdr bst) left-bst-with-deleted)
+                  (set-car! (car bst) max-left)
+                  (sub-1-from-path (cons bst path))
+                  bst-input)))))))))
 
 (define-public (obj-as-string obj)
   (call-with-output-string
