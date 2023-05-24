@@ -2,6 +2,31 @@
 
 (use-modules (bst))
 
+(define (list-with-inserted v k obj)
+  (define l (length v))
+  (define r (make-list (1+ l)))
+  (list-set! r k obj)
+  (let loop ((i 0))
+    (when (< i (1+ l))
+      (unless (= i k)
+        (list-set! r i
+          (list-ref v (if (> i k) (1- i) i))))
+      (loop (1+ i))))
+  r)
+
+(define (for-each-comb n proc)
+  (when (> n 0)
+    (if (= n 1)
+      (proc (list 0))
+      (for-each-comb
+        (1- n)
+        (lambda (comb)
+          (let loop ((i (1- n)))
+            (when (>= i 0)
+              (begin
+                (proc (list-with-inserted comb i (1- n)))
+                (loop (1- i))))))))))
+
 (define-public (test-bst-valid? test-fns)
   (define bst-proc (make-bst-proc <))
   (define bst (bst-proc 'make))
@@ -173,4 +198,24 @@
   (test-fns 'assert-equal (cdar bst) 1)
   (set! bst (bst-proc 'delete! bst -4))
   (test-fns 'assert-equal bst '())
+
+  (define comb-length 3)
+  (for-each-comb
+    comb-length
+    (lambda (comb-to-add)
+      (for-each-comb
+        comb-length
+        (lambda (comb-to-delete)
+          (define bst (bst-proc 'make))
+          (for-each
+            (lambda (k-to-add)
+              (set! bst (bst-proc 'add! bst k-to-add))
+              (bst-proc 'valid? bst))
+            comb-to-add)
+          (for-each
+            (lambda (k-to-delete)
+              (set! bst (bst-proc 'delete! bst k-to-delete))
+              (bst-proc 'valid? bst))
+            comb-to-delete)
+          (test-fns 'assert-equal bst '())))))
 )

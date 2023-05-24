@@ -192,12 +192,7 @@ Cheat-sheet:
         (let ((bst (car path)))
           (set-cdr! (car bst) (1- (cdar bst)))
           (loop (cdr path))))))
-  (let loop
-    (
-      (bst bst-input)
-      (parent '())
-      (parent-dir '())
-      (path '()))
+  (let loop ((bst bst-input) (parent '()) (parent-dir '()) (path '()))
     (if (null? bst)
       bst-input
       (let ((payload (caar bst)) (left-bst (cadr bst)) (right-bst (cddr bst)))
