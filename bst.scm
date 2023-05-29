@@ -118,16 +118,16 @@ Cheat-sheet:
               #f
               (loop (next)))))))))
 
+(define (inc-bsts-seen! bsts-seen)
+  (let loop ((bsts bsts-seen))
+    (unless (null? bsts)
+      (let ((bst (car bsts)))
+        (set-cdr! (car bst) (1+ (cdar bst)))
+        (loop (cdr bsts))))))
+
 (define-public (bst-add! less-proc bst-input k)
   (define (bst-size-one)
     (cons (cons k 1) (cons '() '())))
-
-  (define (inc-bsts-seen! bsts-seen)
-    (let loop ((bsts bsts-seen))
-      (unless (null? bsts)
-        (let ((bst (car bsts)))
-          (set-cdr! (car bst) (1+ (cdar bst)))
-          (loop (cdr bsts))))))
 
   (if (null? bst-input)
     (bst-size-one)
