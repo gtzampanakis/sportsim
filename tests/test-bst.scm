@@ -237,7 +237,7 @@
   (set! bst (bst-proc 'add! bst 15))
   (bst-pretty-print bst)
   (newline)
-  (set! bst (bst-balance! < bst))
+  (set! bst (bst-proc 'balance! bst))
   (bst-pretty-print bst)
   (display (bst-proc 'valid? bst))(newline)
 )

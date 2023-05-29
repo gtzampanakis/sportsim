@@ -43,7 +43,9 @@ Cheat-sheet:
       ((equal? command 'size)
         (apply bst-size (append (list less-proc) args)))
       ((equal? command 'walk)
-        (apply bst-walk (append (list less-proc) args))))))
+        (apply bst-walk (append (list less-proc) args)))
+      ((equal? command 'balance!)
+        (apply bst-balance! (append (list less-proc) args))))))
 
 (define (bst-make)
   '())
