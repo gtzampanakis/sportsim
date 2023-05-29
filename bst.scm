@@ -230,6 +230,42 @@ Cheat-sheet:
                   (sub-1-from-path (cons bst path))
                   bst-input)))))))))
 
+(define-public (bst-balance! less-proc bst)
+  (if (null? bst)
+    '()
+    (let ((payload (caar bst)) (left-bst (cadr bst)) (right-bst (cddr bst)))
+      (let
+        (
+          (left-size (if (null? left-bst) 0 (cdar left-bst)))
+          (right-size (if (null? right-bst) 0 (cdar right-bst))))
+        (let ((diff (- left-size right-size)))
+          (if (> diff 1)
+            ; take from left
+            (let ((max-left (bst-max less-proc left-bst)))
+              (set-car! (car bst) max-left)
+              (let
+                (
+                  (left-bst-with-deleted
+                    (bst-delete! less-proc left-bst max-left)))
+                (bst-add! less-proc bst payload)
+                (set-cdr! (car bst) (1- (cdar bst)))
+                (bst-balance! less-proc bst)))
+            (if (< diff -1)
+              ; take from right
+              (let ((min-right (bst-min less-proc right-bst)))
+                (set-car! (car bst) min-right)
+                (let
+                  (
+                    (right-bst-with-deleted
+                      (bst-delete! less-proc right-bst min-right)))
+                  (bst-add! less-proc bst payload)
+                  (set-cdr! (car bst) (1- (cdar bst)))
+                  (bst-balance! less-proc bst)))
+              (begin
+                (unless (null? left-bst) (bst-balance! less-proc left-bst))
+                (unless (null? right-bst) (bst-balance! less-proc right-bst))
+                bst))))))))
+
 (define-public (obj-as-string obj)
   (call-with-output-string
     (lambda (port)
@@ -239,21 +275,26 @@ Cheat-sheet:
   (define result-port (open-output-string))
   (define display-to-result (lambda (obj) (display obj result-port)))
 
-  (let loop ((bst bst-input) (index 1) (parent-index 0))
-    (if (null? (car bst))
-      (display-to-result '())
-      (begin
-        (display-to-result index)
-        (display-to-result " ")
-        (display-to-result parent-index)
-        (display-to-result " ")
-        (display-to-result (car bst))
-        (unless (null? (cadr bst))
-          (display-to-result "\n")
-          (loop (cadr bst) (+ index 1) index))
-        (unless (null? (cddr bst))
-          (display-to-result "\n")
-          (loop (cddr bst) (+ index 2) index)))))
+  (define (r)
+    (number->string (random (* 16 16 16 16)) 16))
+
+  (if (null? bst-input)
+    (display-to-result '())
+    (let loop ((bst bst-input) (bst-id (r)) (parent-index '()))
+      (if (null? (car bst))
+        (display-to-result '())
+        (begin
+          (display-to-result bst-id)
+          (display-to-result " ")
+          (display-to-result parent-index)
+          (display-to-result " ")
+          (display-to-result (car bst))
+          (unless (null? (cadr bst))
+            (display-to-result "\n")
+            (loop (cadr bst) (r) bst-id))
+          (unless (null? (cddr bst))
+            (display-to-result "\n")
+            (loop (cddr bst) (r) bst-id))))))
 
   (display (get-output-string result-port))
   (newline))
