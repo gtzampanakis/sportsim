@@ -125,6 +125,9 @@ Cheat-sheet:
         (set-cdr! (car bst) (1+ (cdar bst)))
         (loop (cdr bsts))))))
 
+(define (balance-bsts-seen! bsts-seen)
+  1)
+
 (define-public (bst-add! less-proc bst-input k)
   (define (bst-size-one)
     (cons (cons k 1) (cons '() '())))
@@ -137,8 +140,7 @@ Cheat-sheet:
           (
             (left-bst (cadr bst))
             (right-bst (cddr bst))
-            (payload (caar bst))
-            (size (cdar bst)))
+            (payload (caar bst)))
           (if (less-proc k payload)
             (if (null? left-bst)
               (begin
@@ -263,10 +265,7 @@ Cheat-sheet:
                   (bst-add! less-proc bst payload)
                   (set-cdr! (car bst) (1- (cdar bst)))
                   (bst-balance! less-proc bst)))
-              (begin
-                (unless (null? left-bst) (bst-balance! less-proc left-bst))
-                (unless (null? right-bst) (bst-balance! less-proc right-bst))
-                bst))))))))
+              bst)))))))
 
 (define-public (obj-as-string obj)
   (call-with-output-string
