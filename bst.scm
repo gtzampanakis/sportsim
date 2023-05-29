@@ -185,13 +185,14 @@ Cheat-sheet:
     (null? (cadr bst))
     (null? (cddr bst))))
 
+(define (sub-1-from-path path)
+  (let loop ((path path))
+    (unless (null? path)
+      (let ((bst (car path)))
+        (set-cdr! (car bst) (1- (cdar bst)))
+        (loop (cdr path))))))
+
 (define-public (bst-delete! less-proc bst-input k-input)
-  (define (sub-1-from-path path)
-    (let loop ((path path))
-      (unless (null? path)
-        (let ((bst (car path)))
-          (set-cdr! (car bst) (1- (cdar bst)))
-          (loop (cdr path))))))
   (let loop ((bst bst-input) (parent '()) (parent-dir '()) (path '()))
     (if (null? bst)
       bst-input
