@@ -272,7 +272,7 @@ Cheat-sheet:
     (lambda (port)
       (write obj port))))
 
-(define-public (bst-pretty-print bst-input)
+(define-public (bst-list-print bst-input)
   (define result-port (open-output-string))
   (define display-to-result (lambda (obj) (display obj result-port)))
 
@@ -299,3 +299,49 @@ Cheat-sheet:
 
   (display (get-output-string result-port))
   (newline))
+
+(define-public (obj-string-length obj)
+  (string-length
+    (call-with-output-string
+      (lambda (port)
+        (display obj port)))))
+
+(define-public (call-n-times n proc)
+  (when (> n 0)
+    (begin (proc) (call-n-times (1- n) proc))))
+
+(define-public (bst-as-graph-string bst)
+  (define result-port (open-output-string))
+  (define display-to-result (lambda (obj) (display obj result-port)))
+
+  (if (null? bst)
+    (display-to-result '())
+    (let*
+      (
+        (payload-head (caar bst))
+        (payload-left (if (null? (cadr bst)) '() (caar (cadr bst))))
+        (payload-right (if (null? (cddr bst)) '() (caar (cddr bst))))
+        (payload-head-length (obj-string-length payload-head))
+        (payload-left-length (obj-string-length payload-left))
+        (payload-right-length (obj-string-length payload-right)))
+      (display-to-result " ")
+      (display-to-result payload-head)
+      (call-n-times payload-left-length (lambda () (display-to-result " ")))
+      (display-to-result "\n")
+      (display-to-result "+")
+      (display-to-result "^")
+      (call-n-times
+        (1- payload-left-length) (lambda () (display-to-result "-")))
+      (display-to-result "+")
+      (display-to-result "\n")
+      (display-to-result "|")
+      (call-n-times
+        payload-left-length (lambda () (display-to-result " ")))
+      (display-to-result "|")
+      (display-to-result "\n")
+      (display-to-result payload-left)
+      (display-to-result " ")
+      (display-to-result payload-right)))
+
+  (display-to-result "\n")
+  (get-output-string result-port))
