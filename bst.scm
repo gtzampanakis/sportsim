@@ -346,11 +346,6 @@ Cheat-sheet:
               char-matrix
               (make-list d '()))))
         char-matrices))
-    ;(define char-matrices-spaced
-    ;  (list
-    ;    (list-ref char-matrices-with-padding-rows 0)
-    ;    (list (list #\f))
-    ;    (list-ref char-matrices-with-padding-rows 1)))
     (apply
       map
       (append
