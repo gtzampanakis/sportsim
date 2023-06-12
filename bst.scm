@@ -1,5 +1,7 @@
 (define-module (bst))
 
+(use-modules (srfi srfi-1))
+
 #|
 A bst is a pair whose car is either the empty list or a pair (head-payload .
 size) and whose cdr is a pair of bsts, empty lists or a combination thereof.
@@ -124,9 +126,6 @@ Cheat-sheet:
       (let ((bst (car bsts)))
         (set-cdr! (car bst) (1+ (cdar bst)))
         (loop (cdr bsts))))))
-
-(define (balance-bsts-seen! bsts-seen)
-  1)
 
 (define-public (bst-add! less-proc bst-input k)
   (define (bst-size-one)
@@ -310,38 +309,107 @@ Cheat-sheet:
   (when (> n 0)
     (begin (proc) (call-n-times (1- n) proc))))
 
-(define-public (bst-as-graph-string bst)
-  (define result-port (open-output-string))
-  (define display-to-result (lambda (obj) (display obj result-port)))
+(define-public (obj-as-char-list obj)
+  (define s
+    (let ((result-port (open-output-string)))
+      (display obj result-port)
+      (get-output-string result-port)))
+  (let loop ((r '()) (i (1- (string-length s))))
+    (if (= i -1)
+      r
+      (loop (cons (string-ref s i) r) (1- i)))))
 
+(define-public append-with-min-sizes
+  ; Append lists in lss padding each list with spaces if it is shorter than the
+  ; respective min-sizes element.
+  (lambda (lss min-sizes)
+    (apply
+      append
+      (map
+        (lambda (ls min-size)
+          (append
+            ls
+            (let ((s (- min-size (length ls))))
+              (if (>= s 0) (make-list s #\space) '()))))
+        lss min-sizes))))
+
+(define-public side-by-side-char-matrices
+  (lambda char-matrices
+    (define min-sizes
+      (map char-matrix-width char-matrices))
+    (define max-rows (apply max (map length char-matrices)))
+    (define char-matrices-with-padding-rows
+      (map
+        (lambda (char-matrix)
+          (let ((d (- max-rows (length char-matrix))))
+            (append
+              char-matrix
+              (make-list d '()))))
+        char-matrices))
+    ;(define char-matrices-spaced
+    ;  (list
+    ;    (list-ref char-matrices-with-padding-rows 0)
+    ;    (list (list #\f))
+    ;    (list-ref char-matrices-with-padding-rows 1)))
+    (apply
+      map
+      (append
+        (list
+          (lambda rows
+            (append-with-min-sizes rows min-sizes)))
+        char-matrices-with-padding-rows))))
+
+(define-public (display-char-matrix char-matrix)
+  (let loop-rows ((i 0))
+    (when (< i (length char-matrix))
+      (let ((row (list-ref char-matrix i)))
+        (let loop-chars ((j 0))
+          (when (< j (length row))
+            (let ((c (list-ref row j)))
+              (display c))
+            (loop-chars (1+ j)))))
+      (display #\newline)
+      (loop-rows (1+ i)))))
+
+(define-public (char-matrix-width char-matrix)
+  (if (null? char-matrix)
+    0
+    (length (car char-matrix))))
+
+(define-public (bst-as-char-matrix bst)
   (if (null? bst)
-    (display-to-result '())
+    (list (obj-as-char-list bst))
     (let*
       (
-        (payload-head (caar bst))
-        (payload-left (if (null? (cadr bst)) '() (caar (cadr bst))))
-        (payload-right (if (null? (cddr bst)) '() (caar (cddr bst))))
-        (payload-head-length (obj-string-length payload-head))
-        (payload-left-length (obj-string-length payload-left))
-        (payload-right-length (obj-string-length payload-right)))
-      (display-to-result " ")
-      (display-to-result payload-head)
-      (call-n-times payload-left-length (lambda () (display-to-result " ")))
-      (display-to-result "\n")
-      (display-to-result "+")
-      (display-to-result "^")
-      (call-n-times
-        (1- payload-left-length) (lambda () (display-to-result "-")))
-      (display-to-result "+")
-      (display-to-result "\n")
-      (display-to-result "|")
-      (call-n-times
-        payload-left-length (lambda () (display-to-result " ")))
-      (display-to-result "|")
-      (display-to-result "\n")
-      (display-to-result payload-left)
-      (display-to-result " ")
-      (display-to-result payload-right)))
-
-  (display-to-result "\n")
-  (get-output-string result-port))
+        (left-bst (cadr bst))
+        (right-bst (cddr bst))
+        (payload (caar bst))
+        (payload-as-char-list (obj-as-char-list payload))
+        (left-bst-as-char-matrix (bst-as-char-matrix left-bst))
+        (right-bst-as-char-matrix (bst-as-char-matrix right-bst))
+        (left-bst-char-matrix-width
+          (char-matrix-width left-bst-as-char-matrix))
+        (right-bst-char-matrix-width
+          (char-matrix-width right-bst-as-char-matrix))
+        (both-bsts-as-char-matrix
+          (side-by-side-char-matrices
+            left-bst-as-char-matrix
+            (list (list #\space))
+            right-bst-as-char-matrix)))
+      (append
+        (list
+          (append
+            payload-as-char-list
+            (let
+              (
+                (d
+                  (-
+                    (char-matrix-width both-bsts-as-char-matrix)
+                    (length payload-as-char-list))))
+              (if (> d 0) (make-list d #\space) '())))
+          (append
+            (list #\|)
+            (make-list (1- left-bst-char-matrix-width) #\-)
+            (list #\-)
+            (list #\+)))
+        both-bsts-as-char-matrix))))

@@ -223,9 +223,44 @@
 (define-public (test-bst-as-graph-string test-fns)
   (define bst-proc (make-bst-proc <))
   (define bst (bst-proc 'make))
-  (set! bst (bst-proc 'add! bst 2000000))
-  (set! bst (bst-proc 'add! bst 1234567))
-  (set! bst (bst-proc 'add! bst 3000000))
+  (set! bst (bst-proc 'add! bst 1))
+  (set! bst (bst-proc 'add! bst 2))
+  (set! bst (bst-proc 'add! bst 3))
+  (set! bst (bst-proc 'add! bst 4))
+  (set! bst (bst-proc 'add! bst 5))
+  (set! bst (bst-proc 'add! bst 6))
+  (set! bst (bst-proc 'add! bst 7))
+  (set! bst (bst-proc 'add! bst 8))
 
-  (display (bst-as-graph-string bst))
+  ;(display (bst-as-graph-string bst))
+  ;(display (bst-as-box-string bst))
+  ;(display (obj-as-char-matrix '(1 2 3)))(newline)
+  ;(display-char-matrix (bst-as-char-matrix bst))
+  ;(display (bst-as-char-matrix bst))(newline)
+  ;(display (side-by-side-char-matrices '(1 2 3) '(0 1 2 3 4)))(newline)
+  ;(display
+  ;  (append-with-min-sizes
+  ;    (list '(1 2 3) '(4 5 6) '(7 8 9) '(2 3))
+  ;    (list 7 15 22 4)))
+  ;(newline)
+  ;(display-char-matrix
+  ;  (side-by-side-char-matrices
+  ;    (list
+  ;      (list #\a #\b #\z)
+  ;      (list #\a #\b #\y)
+  ;      (list #\t)
+  ;      (list #\t))
+  ;    (list
+  ;      (list #\d #\e)
+  ;      (list #\d)
+  ;      (list #\f #\g))
+  ;    (list
+  ;      (list #\i #\p #\n))))
+  (display-char-matrix
+    (bst-as-char-matrix bst))
+
+  (set! bst (bst-proc 'balance! bst))
+
+  (display-char-matrix
+    (bst-as-char-matrix bst))
 )
