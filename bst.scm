@@ -131,6 +131,12 @@ Cheat-sheet:
   (define (bst-size-one)
     (cons (cons k 1) (cons '() '())))
 
+  (define balance-all-the-way
+    (lambda (bsts-seen)
+      (map
+        (lambda (bst) (bst-balance! less-proc bst))
+        bsts-seen)))
+
   (if (null? bst-input)
     (bst-size-one)
     (begin
@@ -144,12 +150,14 @@ Cheat-sheet:
             (if (null? left-bst)
               (begin
                 (inc-bsts-seen! (cons bst bsts-seen))
-                (set-car! (cdr bst) (bst-size-one)))
+                (set-car! (cdr bst) (bst-size-one))
+                (balance-all-the-way bsts-seen))
               (loop left-bst (cons bst bsts-seen)))
             (if (null? right-bst)
               (begin
                 (inc-bsts-seen! (cons bst bsts-seen))
-                (set-cdr! (cdr bst) (bst-size-one)))
+                (set-cdr! (cdr bst) (bst-size-one))
+                (balance-all-the-way bsts-seen))
               (loop right-bst (cons bst bsts-seen))))))
       bst-input)))
 
