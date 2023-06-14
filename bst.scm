@@ -264,14 +264,17 @@ Cheat-sheet:
             (if (< diff -1)
               ; take from right
               (let ((min-right (bst-min less-proc right-bst)))
-                (set-car! (car bst) min-right)
-                (let
-                  (
-                    (right-bst-with-deleted
-                      (bst-delete! less-proc right-bst min-right)))
-                  (bst-add! less-proc bst payload)
-                  (set-cdr! (car bst) (1- (cdar bst)))
-                  (bst-balance! less-proc bst)))
+                (when (> min-right payload)
+                ; If min-right is equal to payload then continuing will lead to
+                ; an infinite loop.
+                  (set-car! (car bst) min-right)
+                  (let
+                    (
+                      (right-bst-with-deleted
+                        (bst-delete! less-proc right-bst min-right)))
+                    (bst-add! less-proc bst payload)
+                    (set-cdr! (car bst) (1- (cdar bst)))
+                    (bst-balance! less-proc bst))))
               bst)))))))
 
 (define-public (obj-as-string obj)
@@ -416,3 +419,6 @@ Cheat-sheet:
             (list #\-)
             (list #\+)))
         both-bsts-as-char-matrix))))
+
+(define-public (display-bst bst)
+  (display-char-matrix (bst-as-char-matrix bst)))
