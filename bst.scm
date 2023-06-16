@@ -423,42 +423,6 @@ Cheat-sheet:
 (define-public (display-bst bst)
   (display-char-matrix (bst-as-char-matrix bst)))
 
-(define-public
-  (bst-for-each-in-order
-    less-proc bst proc direction bound)
-  ; TODO: needs smart application of the bound, right it now it just checks
-  ; every payload
-  (define proc-bounded
-    (lambda (payload)
-      (when
-        (or
-          (and
-            (equal? direction 'asc)
-            (null? bound))
-          (and
-            (equal? direction 'asc)
-            (not (null? bound))
-            (not (less-proc payload bound))))
-        (proc payload))))
-
-  (unless (null? bst)
-    (let loop ((bst bst))
-      (let
-        (
-          (payload (caar bst))
-          (left-bst (cadr bst))
-          (right-bst (cddr bst)))
-        (if (null? left-bst)
-          (if (null? right-bst)
-            (proc-bounded payload)
-            (begin
-              (proc-bounded payload)
-              (loop right-bst)))
-          (begin
-            (loop left-bst)
-            (proc-bounded payload)
-            (loop right-bst)))))))
-
 (define-public (lt less-proc a b)
   (less-proc a b))
 
@@ -474,16 +438,30 @@ Cheat-sheet:
 (define-public (lte less-proc a b)
   (not (less-proc b a)))
 
-;(define-public (bst-for-each less-proc bst proc direction cmp-op cmp-val)
-;  ;cpm-op can be gt, gte, lt, lte, eq
-;  (define (gt a b)
-;  (unless (null? bst)
-;    (let loop ((bst bst))
-;      (let
-;        (
-;          (payload (caar bst))
-;          (left-bst (cadr bst))
-;          (right-bst (cddr bst)))
-;        (when (null? cmp-op) (proc payload))
-;        (when (equal? cmp-op 'gt)
-;          (when (
+(define-public (bst-for-each less-proc bst proc direction cmp-op cmp-val)
+  (define payload-passes?
+    (lambda (payload)
+      (or
+        (null? cmp-op)
+        (and (equal? cmp-op 'gt)  (gt  less-proc payload cmp-val))
+        (and (equal? cmp-op 'gte) (gte less-proc payload cmp-val))
+        (and (equal? cmp-op 'lt)  (lt  less-proc payload cmp-val))
+        (and (equal? cmp-op 'lte) (lte less-proc payload cmp-val))
+        (and (equal? cmp-op 'eq)  (eq  less-proc payload cmp-val)))))
+  (let loop ((bst bst))
+    (unless (null? bst)
+      (let
+        (
+          (payload (caar bst))
+          (left-bst (cadr bst))
+          (right-bst (cddr bst)))
+        (begin
+          (loop
+            (if (equal? direction 'asc)
+              left-bst
+              right-bst))
+          (when (payload-passes? payload) (proc payload))
+          (loop
+            (if (equal? direction 'asc)
+              right-bst
+              left-bst)))))))
