@@ -49,7 +49,7 @@ Cheat-sheet:
       ((equal? command 'balance!)
         (apply bst-balance! (append (list less-proc) args))))))
 
-(define (bst-make)
+(define-public (bst-make)
   '())
 
 (define-public (bst-valid? less-proc bst-input)
@@ -175,7 +175,7 @@ Cheat-sheet:
             '()
             (loop (cddr bst))))))))
 
-(define-public (bst-min-max less-proc bst-input min-max)
+(define-public (bst-min-max less-proc bst-input min-max bound)
   (define proc (if (equal? min-max 'min) cadr cddr))
   (if (null? bst-input)
     '()
@@ -185,10 +185,10 @@ Cheat-sheet:
         (loop (proc bst))))))
 
 (define-public (bst-min less-proc bst-input)
-  (bst-min-max less-proc bst-input 'min))
+  (bst-min-max less-proc bst-input 'min '()))
 
 (define-public (bst-max less-proc bst-input)
-  (bst-min-max less-proc bst-input 'max))
+  (bst-min-max less-proc bst-input 'max '()))
 
 (define (leaf? bst)
   (and
@@ -422,3 +422,68 @@ Cheat-sheet:
 
 (define-public (display-bst bst)
   (display-char-matrix (bst-as-char-matrix bst)))
+
+(define-public
+  (bst-for-each-in-order
+    less-proc bst proc direction bound)
+  ; TODO: needs smart application of the bound, right it now it just checks
+  ; every payload
+  (define proc-bounded
+    (lambda (payload)
+      (when
+        (or
+          (and
+            (equal? direction 'asc)
+            (null? bound))
+          (and
+            (equal? direction 'asc)
+            (not (null? bound))
+            (not (less-proc payload bound))))
+        (proc payload))))
+
+  (unless (null? bst)
+    (let loop ((bst bst))
+      (let
+        (
+          (payload (caar bst))
+          (left-bst (cadr bst))
+          (right-bst (cddr bst)))
+        (if (null? left-bst)
+          (if (null? right-bst)
+            (proc-bounded payload)
+            (begin
+              (proc-bounded payload)
+              (loop right-bst)))
+          (begin
+            (loop left-bst)
+            (proc-bounded payload)
+            (loop right-bst)))))))
+
+(define-public (lt less-proc a b)
+  (less-proc a b))
+
+(define-public (gte less-proc a b)
+  (not (less-proc a b)))
+
+(define-public (gt less-proc a b)
+  (and (not (less-proc a b)) (less-proc b a)))
+
+(define-public (eq less-proc a b)
+  (and (not (less-proc a b)) (not (less-proc b a))))
+
+(define-public (lte less-proc a b)
+  (not (less-proc b a)))
+
+;(define-public (bst-for-each less-proc bst proc direction cmp-op cmp-val)
+;  ;cpm-op can be gt, gte, lt, lte, eq
+;  (define (gt a b)
+;  (unless (null? bst)
+;    (let loop ((bst bst))
+;      (let
+;        (
+;          (payload (caar bst))
+;          (left-bst (cadr bst))
+;          (right-bst (cddr bst)))
+;        (when (null? cmp-op) (proc payload))
+;        (when (equal? cmp-op 'gt)
+;          (when (

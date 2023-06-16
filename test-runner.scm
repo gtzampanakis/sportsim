@@ -28,6 +28,7 @@
   test-bst-includes?
   test-bst-delete!
   test-bst-as-graph-string
+  test-bst-for-each-in-order
 ))
 
 (define (raise-failed-test obj)
