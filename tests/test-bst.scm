@@ -241,6 +241,7 @@
         (set! bst (bst-add! less-proc bst i))
         (loop (1+ i)))))
 
+  (display-bst bst)
   (let ((proc (lambda (p) (display p)(newline))))
-    (bst-for-each less-proc bst proc 'desc 'lte 8))
+    (bst-for-each less-proc bst proc 'asc 'gte 30))
 )

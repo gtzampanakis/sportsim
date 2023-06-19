@@ -443,25 +443,27 @@ Cheat-sheet:
     (lambda (payload)
       (or
         (null? cmp-op)
-        (and (equal? cmp-op 'gt)  (gt  less-proc payload cmp-val))
-        (and (equal? cmp-op 'gte) (gte less-proc payload cmp-val))
         (and (equal? cmp-op 'lt)  (lt  less-proc payload cmp-val))
-        (and (equal? cmp-op 'lte) (lte less-proc payload cmp-val))
-        (and (equal? cmp-op 'eq)  (eq  less-proc payload cmp-val)))))
+        (and (equal? cmp-op 'gte) (gte less-proc payload cmp-val)))))
   (let loop ((bst bst))
     (unless (null? bst)
-      (let
+      (let*
         (
           (payload (caar bst))
           (left-bst (cadr bst))
-          (right-bst (cddr bst)))
-        (begin
-          (loop
-            (if (equal? direction 'asc)
-              left-bst
-              right-bst))
-          (when (payload-passes? payload) (proc payload))
-          (loop
-            (if (equal? direction 'asc)
-              right-bst
-              left-bst)))))))
+          (right-bst (cddr bst))
+          (branches
+            (if (less-proc payload cmp-val)
+              (cond
+                ((equal? cmp-op 'lt) (list 'left 'self 'right))
+                ((equal? cmp-op 'gte) (list '() '() 'right)))
+              (cond
+                ((equal? cmp-op 'lt) (list 'left '() '()))
+                ((equal? cmp-op 'gte) (list 'left 'self 'right))))))
+        (when (equal? (list-ref branches 0) 'left)
+          (loop left-bst))
+        (when (equal? (list-ref branches 1) 'self)
+          (when (payload-passes? payload)
+            (proc payload)))
+        (when (equal? (list-ref branches 2) 'right)
+          (loop right-bst))))))
