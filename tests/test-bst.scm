@@ -243,5 +243,5 @@
 
   (display-bst bst)
   (let ((proc (lambda (p) (display p)(newline))))
-    (bst-for-each less-proc bst proc 'asc 'gte 30))
+    (bst-for-each less-proc bst proc 'desc 'gte 25))
 )

@@ -441,10 +441,11 @@ Cheat-sheet:
 (define-public (bst-for-each less-proc bst proc direction cmp-op cmp-val)
   (define payload-passes?
     (lambda (payload)
-      (or
-        (null? cmp-op)
-        (and (equal? cmp-op 'lt)  (lt  less-proc payload cmp-val))
-        (and (equal? cmp-op 'gte) (gte less-proc payload cmp-val)))))
+      (let ((less? (less-proc payload cmp-val)))
+        (or
+          (null? cmp-op)
+          (and (equal? cmp-op 'lt) less?)
+          (and (equal? cmp-op 'gte) (not less?))))))
   (let loop ((bst bst))
     (unless (null? bst)
       (let*
@@ -452,18 +453,37 @@ Cheat-sheet:
           (payload (caar bst))
           (left-bst (cadr bst))
           (right-bst (cddr bst))
-          (branches
-            (if (less-proc payload cmp-val)
-              (cond
-                ((equal? cmp-op 'lt) (list 'left 'self 'right))
-                ((equal? cmp-op 'gte) (list '() '() 'right)))
-              (cond
-                ((equal? cmp-op 'lt) (list 'left '() '()))
-                ((equal? cmp-op 'gte) (list 'left 'self 'right))))))
-        (when (equal? (list-ref branches 0) 'left)
-          (loop left-bst))
-        (when (equal? (list-ref branches 1) 'self)
+          (less? (if (null? cmp-op) '() (less-proc payload cmp-val))))
+        (define calls '())
+        (when
+          (or
+            (null? cmp-op)
+            less?
+            (and (not less?) (equal? cmp-op 'gte)))
+          (set! calls
+            (cons
+              (list loop right-bst)
+              calls)))
+        (when
+          (or
+            (null? cmp-op)
+            (and less? (equal? cmp-op 'lt))
+            (and (not less?) (equal? cmp-op 'gte)))
           (when (payload-passes? payload)
-            (proc payload)))
-        (when (equal? (list-ref branches 2) 'right)
-          (loop right-bst))))))
+            (set! calls
+              (cons
+                (list proc payload)
+                calls))))
+        (when
+          (or
+            (null? cmp-op)
+            (and less? (equal? cmp-op 'lt))
+            (not less?))
+          (set! calls
+            (cons
+              (list loop left-bst)
+              calls)))
+        (for-each
+          (lambda (c)
+            (apply (car c) (cdr c)))
+          (if (equal? direction 'asc) calls (reverse calls)))))))
