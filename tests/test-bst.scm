@@ -231,17 +231,51 @@
   (bst-as-char-matrix bst)
 )
 
+(define-public (range n)
+  (let loop ((n n) (r '()))
+    (if (= n 0)
+      r
+      (loop (1- n) (cons (1- n) r)))))
+
 (define-public (test-bst-for-each-in-order test-fns)
   (define less-proc <)
   (define bst (bst-make))
+  (define numbers (sort (append (range 20) (range 30)) less-proc))
 
-  (let loop ((i 0))
-    (if (< i 30)
-      (begin
-        (set! bst (bst-add! less-proc bst i))
-        (loop (1+ i)))))
+  (for-each
+    (lambda (n)
+      (set! bst (bst-add! less-proc bst n)))
+    numbers)
 
-  (display-bst bst)
-  (let ((proc (lambda (p) (display p)(newline))))
-    (bst-for-each less-proc bst proc 'desc 'gte 25))
+  (test-fns 'assert-equal
+    (bst-results-list less-proc bst 'asc 'gte 0)
+    (filter (lambda (n) (>= n 0)) numbers))
+
+  (test-fns 'assert-equal
+    (bst-results-list less-proc bst 'asc 'gte 15)
+    (filter (lambda (n) (>= n 15)) numbers))
+
+  (test-fns 'assert-equal
+    (bst-results-list less-proc bst 'desc 'gte 0)
+    (reverse (filter (lambda (n) (>= n 0)) numbers)))
+
+  (test-fns 'assert-equal
+    (bst-results-list less-proc bst 'desc 'gte 15)
+    (reverse (filter (lambda (n) (>= n 15)) numbers)))
+
+  (test-fns 'assert-equal
+    (bst-results-list less-proc bst 'asc 'lt 100)
+    (filter (lambda (n) (< n 100)) numbers))
+
+  (test-fns 'assert-equal
+    (bst-results-list less-proc bst 'asc 'lt 15)
+    (filter (lambda (n) (< n 15)) numbers))
+
+  (test-fns 'assert-equal
+    (bst-results-list less-proc bst 'desc 'lt 100)
+    (reverse (filter (lambda (n) (< n 100)) numbers)))
+
+  (test-fns 'assert-equal
+    (bst-results-list less-proc bst 'desc 'lt 15)
+    (reverse (filter (lambda (n) (< n 15)) numbers)))
 )

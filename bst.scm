@@ -487,3 +487,15 @@ Cheat-sheet:
           (lambda (c)
             (apply (car c) (cdr c)))
           (if (equal? direction 'asc) calls (reverse calls)))))))
+
+(define-public (bst-results-list less-proc bst direction cmp-op cmp-val)
+  (let ((r '()))
+    (let ((proc (lambda (p) (set! r (cons p r)))))
+      (bst-for-each
+        less-proc
+        bst
+        proc 
+        (if (equal? direction 'asc) 'desc 'asc)
+        cmp-op
+        cmp-val))
+    r))
