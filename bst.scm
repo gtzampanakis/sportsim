@@ -439,13 +439,16 @@ Cheat-sheet:
   (not (less-proc b a)))
 
 (define-public (bst-for-each less-proc bst proc direction cmp-op cmp-val)
-  (define payload-passes?
-    (lambda (payload)
-      (let ((less? (less-proc payload cmp-val)))
-        (or
-          (null? cmp-op)
-          (and (equal? cmp-op 'lt) less?)
-          (and (equal? cmp-op 'gte) (not less?))))))
+  (define (payload-passes? payload)
+    (if (null? cmp-op)
+      #t
+      (
+        (cond
+          ((equal? cmp-op 'lt) lt)
+          ((equal? cmp-op 'gte) gte))
+        less-proc
+        payload
+        cmp-val)))
   (let loop ((bst bst))
     (unless (null? bst)
       (let*
@@ -464,16 +467,11 @@ Cheat-sheet:
             (cons
               (list loop right-bst)
               calls)))
-        (when
-          (or
-            (null? cmp-op)
-            (and less? (equal? cmp-op 'lt))
-            (and (not less?) (equal? cmp-op 'gte)))
-          (when (payload-passes? payload)
-            (set! calls
-              (cons
-                (list proc payload)
-                calls))))
+        (when (payload-passes? payload)
+          (set! calls
+            (cons
+              (list proc payload)
+              calls)))
         (when
           (or
             (null? cmp-op)
