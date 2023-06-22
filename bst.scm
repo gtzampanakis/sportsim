@@ -439,13 +439,21 @@ Cheat-sheet:
   (not (less-proc b a)))
 
 (define-public (bst-for-each less-proc bst proc direction cmp-op cmp-val)
+  (define cmp-op-lt? (equal? cmp-op 'lt))
+  (define cmp-op-lte? (equal? cmp-op 'lte))
+  (define cmp-op-gt? (equal? cmp-op 'gt))
+  (define cmp-op-gte? (equal? cmp-op 'gte))
+  (define cmp-op-eq? (equal? cmp-op 'eq))
   (define (payload-passes? payload)
     (if (null? cmp-op)
       #t
       (
         (cond
           ((equal? cmp-op 'lt) lt)
-          ((equal? cmp-op 'gte) gte))
+          ((equal? cmp-op 'lte) lte)
+          ((equal? cmp-op 'gt) gt)
+          ((equal? cmp-op 'gte) gte)
+          ((equal? cmp-op 'eq) eq))
         less-proc
         payload
         cmp-val)))
@@ -456,31 +464,67 @@ Cheat-sheet:
           (payload (caar bst))
           (left-bst (cadr bst))
           (right-bst (cddr bst))
-          (less? (if (null? cmp-op) '() (less-proc payload cmp-val))))
+          (p-lt-cv? (if (null? cmp-op) '() (lt less-proc payload cmp-val)))
+          (p-gt-cv? (if (null? cmp-op) '() (gt less-proc payload cmp-val)))
+          (p-eq-cv? (if (null? cmp-op) '() (eq less-proc payload cmp-val))))
         (define calls '())
-        (when
-          (or
-            (null? cmp-op)
-            less?
-            (and (not less?) (equal? cmp-op 'gte)))
-          (set! calls
-            (cons
-              (list loop right-bst)
-              calls)))
+        (let
+          ((should-examine-right
+            (cond
+              ((null? cmp-op) #t)
+              ((and p-lt-cv? cmp-op-lt?) #t)
+              ((and p-lt-cv? cmp-op-lte?) #t)
+              ((and p-lt-cv? cmp-op-gt?) #t)
+              ((and p-lt-cv? cmp-op-gte?) #t)
+              ((and p-lt-cv? cmp-op-eq?) #t)
+
+              ((and p-gt-cv? cmp-op-lt?) #f)
+              ((and p-gt-cv? cmp-op-lte?) #f)
+              ((and p-gt-cv? cmp-op-gt?) #t)
+              ((and p-gt-cv? cmp-op-gte?) #t)
+              ((and p-gt-cv? cmp-op-eq?) #f)
+
+              ((and p-eq-cv? cmp-op-lt?) #f)
+              ((and p-eq-cv? cmp-op-lte?) #t)
+              ((and p-eq-cv? cmp-op-gt?) #t)
+              ((and p-eq-cv? cmp-op-gte?) #t)
+              ((and p-eq-cv? cmp-op-eq?) #t))))
+          (when should-examine-right
+            (set! calls
+              (cons
+                (list loop right-bst)
+                calls))))
         (when (payload-passes? payload)
           (set! calls
             (cons
               (list proc payload)
               calls)))
-        (when
-          (or
-            (null? cmp-op)
-            (and less? (equal? cmp-op 'lt))
-            (not less?))
-          (set! calls
-            (cons
-              (list loop left-bst)
-              calls)))
+        (let
+          ((should-examine-left
+            (cond
+              ((null? cmp-op) #t)
+              ((and p-lt-cv? cmp-op-lt?) #t)
+              ((and p-lt-cv? cmp-op-lte?) #t)
+              ((and p-lt-cv? cmp-op-gt?) #f)
+              ((and p-lt-cv? cmp-op-gte?) #f)
+              ((and p-lt-cv? cmp-op-eq?) #f)
+
+              ((and p-gt-cv? cmp-op-lt?) #t)
+              ((and p-gt-cv? cmp-op-lte?) #t)
+              ((and p-gt-cv? cmp-op-gt?) #t)
+              ((and p-gt-cv? cmp-op-gte?) #t)
+              ((and p-gt-cv? cmp-op-eq?) #t)
+
+              ((and p-eq-cv? cmp-op-lt?) #t)
+              ((and p-eq-cv? cmp-op-lte?) #t)
+              ((and p-eq-cv? cmp-op-gt?) #f)
+              ((and p-eq-cv? cmp-op-gte?) #f)
+              ((and p-eq-cv? cmp-op-eq?) #f))))
+          (when should-examine-left
+            (set! calls
+              (cons
+                (list loop left-bst)
+                calls))))
         (for-each
           (lambda (c)
             (apply (car c) (cdr c)))

@@ -247,35 +247,16 @@
       (set! bst (bst-add! less-proc bst n)))
     numbers)
 
-  (test-fns 'assert-equal
-    (bst-results-list less-proc bst 'asc 'gte 0)
-    (filter (lambda (n) (>= n 0)) numbers))
-
-  (test-fns 'assert-equal
-    (bst-results-list less-proc bst 'asc 'gte 15)
-    (filter (lambda (n) (>= n 15)) numbers))
-
-  (test-fns 'assert-equal
-    (bst-results-list less-proc bst 'desc 'gte 0)
-    (reverse (filter (lambda (n) (>= n 0)) numbers)))
-
-  (test-fns 'assert-equal
-    (bst-results-list less-proc bst 'desc 'gte 15)
-    (reverse (filter (lambda (n) (>= n 15)) numbers)))
-
-  (test-fns 'assert-equal
-    (bst-results-list less-proc bst 'asc 'lt 100)
-    (filter (lambda (n) (< n 100)) numbers))
-
-  (test-fns 'assert-equal
-    (bst-results-list less-proc bst 'asc 'lt 15)
-    (filter (lambda (n) (< n 15)) numbers))
-
-  (test-fns 'assert-equal
-    (bst-results-list less-proc bst 'desc 'lt 100)
-    (reverse (filter (lambda (n) (< n 100)) numbers)))
-
-  (test-fns 'assert-equal
-    (bst-results-list less-proc bst 'desc 'lt 15)
-    (reverse (filter (lambda (n) (< n 15)) numbers)))
+  (for-each
+    (lambda (cmp-op cmp-proc)
+      (for-each
+        (lambda (ordering)
+          (test-fns 'assert-equal
+            (bst-results-list less-proc bst ordering cmp-op 15)
+            (
+              (if (equal? ordering 'asc) append reverse)
+              (filter (lambda (n) (cmp-proc n 15)) numbers))))
+        (list 'asc 'desc)))
+    (list 'lt 'lte 'gt 'gte 'eq)
+    (list < <= > >= =))
 )
