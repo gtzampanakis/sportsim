@@ -264,9 +264,10 @@ Cheat-sheet:
             (if (< diff -1)
               ; take from right
               (let ((min-right (bst-min less-proc right-bst)))
-                (when (> min-right payload)
-                ; If min-right is equal to payload then continuing will lead to
-                ; an infinite loop.
+                (when (less-proc payload min-right)
+                ; Only proceed when min-right is larger than the payload. If
+                ; min-right is equal to payload then continuing will lead to an
+                ; infinite loop.
                   (set-car! (car bst) min-right)
                   (let
                     (

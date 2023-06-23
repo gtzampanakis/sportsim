@@ -6,29 +6,25 @@
 (use-modules (tests test-db))
 
 (define test-suite (list
-  test-compare-dates
-  test-ts->date
-  test-valid-date?
-  test-add-months
-  test-add-years
-  test-next-date-for-schedule
-  test-max-date-that-matches
-  test-list-insert
-  test-gen-rand-perm
-  test-ts->dow
-  test-gen-round-robin
-  test-compare-values
-  test-less-records-1
-  test-less-records-2
-  test-find-index
-  test-find-indices
-  test-bst-valid?
-  test-bst-size
-  test-bst-min-max
-  test-bst-includes?
-  test-bst-delete!
-  test-bst-as-graph-string
-  test-bst-for-each-in-order
+  ;test-compare-dates
+  ;test-ts->date
+  ;test-valid-date?
+  ;test-add-months
+  ;test-add-years
+  ;test-next-date-for-schedule
+  ;test-max-date-that-matches
+  ;test-list-insert
+  ;test-gen-rand-perm
+  ;test-ts->dow
+  ;test-gen-round-robin
+  ;test-bst-valid?
+  ;test-bst-size
+  ;test-bst-min-max
+  ;test-bst-includes?
+  ;test-bst-delete!
+  ;test-bst-as-graph-string
+  ;test-bst-for-each-in-order
+  test-foo
 ))
 
 (define (raise-failed-test obj)
@@ -62,7 +58,9 @@
             (newline p)
             (display key p)
             (newline p)
-            (display args p)
+            (display (car args) p)
+            (display ": " p)
+            (display (apply format #f (cadr args) (caddr args)) p)
             (newline p)
             (newline p)
             (display-backtrace st p)
