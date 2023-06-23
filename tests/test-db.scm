@@ -12,7 +12,7 @@
   (let loop ((i 8))
     (when (> i 0)
       (set! db
-        (insert-record!
+        (db-insert!
           db 'player (make-record 'player (cons 'name "foo"))))
       (loop (1- i))))
   (display-bst (assoc-ref db (list 'table 'player 'data)))(newline)

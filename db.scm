@@ -45,13 +45,15 @@
               (if (equal? field-name 'id) (generate-id) '()))))
         field-names))))
 
-(define-public (insert-record! db tab-name record)
+(define-public (db-insert! db tab-name record)
   (define k (list 'table tab-name 'data))
   (define table-data (assoc-ref db k))
   (assoc-set! db
     k
     (bst-add! less-record-pk table-data record))
   db)
+
+; TODO: indices
 
 ;(define-public (create-index db tab-name fields)
 ;  (define pair
