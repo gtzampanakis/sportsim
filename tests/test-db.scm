@@ -8,15 +8,13 @@
 
 (define-public (test-foo test-fns)
   (define db (create-db))
-  (set! db (create-tab db 't))
-  (set! db (insert-record! db 't (list 0 "a")))
-  (set! db (insert-record! db 't (list 1 "a")))
-  (set! db (insert-record! db 't (list 2 "a")))
-  (set! db (insert-record! db 't (list 3 "a")))
-  (set! db (insert-record! db 't (list 4 "a")))
-  (set! db (insert-record! db 't (list 5 "a")))
-  (set! db (insert-record! db 't (list 6 "a")))
-  (set! db (insert-record! db 't (list 7 "a")))
-  (display-bst (assoc-ref db (list 'table 't 'data)))(newline)
+  (set! db (create-tab db 'player))
+  (let loop ((i 8))
+    (when (> i 0)
+      (set! db
+        (insert-record!
+          db 'player (make-record 'player (cons 'name "foo"))))
+      (loop (1- i))))
+  (display-bst (assoc-ref db (list 'table 'player 'data)))(newline)
 )
 

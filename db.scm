@@ -25,15 +25,32 @@
   (let ((pair (cons (list 'table tab-name 'data) (bst-make))))
     (cons pair db)))
 
-(define-public (less-car-proc pair-1 pair-2)
-  (< (car pair-1) (car pair-2)))
+(define-public (less-record-pk record-1 record-2)
+  (string<? (vector-ref record-1 0) (vector-ref record-2 0)))
+
+(define-public make-record
+  (lambda (tab-name . pairs)
+    (define field-names (db-meta 'fields tab-name))
+    (list->vector
+      (map
+        (lambda (field-name)
+          (call/cc
+            (lambda (cont)
+              (for-each
+                (lambda (pair)
+                  (let ((k (car pair)) (v (cdr pair)))
+                    (when (equal? field-name k)
+                      (cont v))))
+                pairs)
+              (if (equal? field-name 'id) (generate-id) '()))))
+        field-names))))
 
 (define-public (insert-record! db tab-name record)
   (define k (list 'table tab-name 'data))
   (define table-data (assoc-ref db k))
   (assoc-set! db
     k
-    (bst-add! less-car-proc table-data record))
+    (bst-add! less-record-pk table-data record))
   db)
 
 ;(define-public (create-index db tab-name fields)
