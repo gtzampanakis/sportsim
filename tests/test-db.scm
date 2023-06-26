@@ -11,15 +11,17 @@
   (set! db (create-tab db 'player))
 
   (define record-1 (make-record 'player (cons 'id 1) (cons 'name "foo1")))
-  (display-record record-1)
-
   (define record-2 (make-record 'player (cons 'id 2) (cons 'name "foo2")))
-  (display-record record-2)
+  (define record-3 (make-record 'player (cons 'id 3) (cons 'name "foo3")))
+  (define record-4 (make-record 'player (cons 'id 4) (cons 'name "foo4")))
 
   (define less-proc (less-proc-for-fields 'player '(id name)))
 
-  (display (less-proc record-1 record-2))(newline)
-  (display (less-proc record-2 record-1))(newline)
+  (set! db (db-insert! db 'player record-1))
+  (set! db (db-insert! db 'player record-2))
+  (set! db (db-insert! db 'player record-3))
+  (set! db (db-insert! db 'player record-4))
+  (display-bst (assoc-ref db (list 'table 'player 'index '(dob))))
 
   ;(let loop ((i 8))
   ;  (when (> i 0)

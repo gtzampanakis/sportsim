@@ -11,7 +11,7 @@
       ((equal? args '(indices player))
         (list
           '(id)
-          '(name)
+          '(name id)
           '(dob)))
       ((equal? args '(fields country))
         '(id name))

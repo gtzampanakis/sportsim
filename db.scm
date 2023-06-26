@@ -53,11 +53,20 @@
   (define record-data (assoc-ref record 'data))
   (vector-ref record-data (field-index tab-name field)))
 
+(define (less-proc-respecting-nulls less-proc)
+  (lambda (a b)
+    (cond
+      ((and (null? b) (not (null? a))) #t)
+      ((and (null? a) (not (null? b))) #f)
+      ((and (null? a) (null? b)) #f)
+      (else (less-proc a b)))))
+
 (define-public (less-proc-for-field tab-name field)
   (define ft (field-type tab-name field))
-  (cond
-    ((equal? ft 'integer) <)
-    ((equal? ft 'string) string<?)))
+  (less-proc-respecting-nulls
+    (cond
+      ((equal? ft 'integer) <)
+      ((equal? ft 'string) string<?))))
 
 (define-public (display-record record)
   (define tab-name (assoc-ref record 'tab-name))
@@ -108,63 +117,24 @@
       (cons 'tab-name tab-name)
       (cons 'data data-vector))))
 
-;(define-public (record-get-field record field)
-;  (for-each
-;    (db-meta 'fields 
+(define-public (db-insert! db tab-name record)
+  (define indices (db-meta 'indices tab-name))
+  (for-each
+    (lambda (fields)
+      (define index (assoc-ref db (list 'table tab-name 'index fields)))
+      (define less-proc (less-proc-for-fields tab-name fields))
+      (define new-index
+        (bst-add! less-proc index
+          (cons
+            (map
+              (lambda (field)
+                (record-value record field))
+            fields)
+            record)))
+      (assoc-set! db (list 'table tab-name 'index fields) new-index))
+    indices)
+  db)
 
-;(define-public (db-insert! db tab-name record)
-;  (define indices (db-meta 'indices tab-name))
-;  (for-each
-;    (lambda (fields)
-;      (define index (db-meta 'table tab-name 'index fields))
-;      (bst-add! less-rec
-;    )
-;    indices))
-
-;(define-public (insert-record! db tab-name record)
-;  (let ((h (cdr (assoc (list 'table tab-name 'data) db))))
-;    (hash-set! h (vector-ref record 0) record)))
-;
-;(define-public (compare-values v1 v2)
-;  (cond
-;    ((and (number? v1) (number? v2))
-;      (- v1 v2))
-;    ((and (string? v1) (string? v2))
-;      (cond
-;        ((string=? v1 v2) 0)
-;        ((string<? v1 v2) -1)
-;        ((string>? v1 v2) 1)))
-;    ((and (date? v1) (date? v2))
-;      (compare-dates v1 v2))))
-;
-;(define-public (less-records r1 r2 field-indices)
-;  (if (null? field-indices)
-;    #f
-;    (let ((field-index (car field-indices)))
-;      (define v1 (vector-ref r1 field-index))
-;      (define v2 (vector-ref r2 field-index))
-;      (define compare-result (compare-values v1 v2))
-;      (cond
-;        ((= compare-result 0)
-;          (less-records r1 r2 (cdr field-indices)))
-;        ((< compare-result 0)
-;          #t)
-;        (else
-;          #f)))))
-;
-;(define-public (find-index obj ls)
-;  (let loop ((e 0) (ls ls))
-;    (if (null? ls)
-;      #f
-;      (if (equal? obj (car ls))
-;        e
-;        (loop (1+ e) (cdr ls))))))
-;
-;(define-public (find-indices objs ls)
-;  (map
-;    (lambda (obj) (find-index obj ls))
-;    objs))
-;
 ;(define*
 ;    (query-tab
 ;      db tab-name #:key (pred '()) (order-by '()) (limit -1))
