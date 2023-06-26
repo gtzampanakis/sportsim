@@ -54,23 +54,38 @@
   (vector-ref record-data (field-index tab-name field)))
 
 (define-public (less-proc-for-field tab-name field)
-  (define field-type (field-type tab-name field))
+  (define ft (field-type tab-name field))
   (cond
-    ((equal? field-type 'integer) <)
-    ((equal? field-type 'string) string<?)))
+    ((equal? ft 'integer) <)
+    ((equal? ft 'string) string<?)))
 
-(define-public (display-record)
-  1)
+(define-public (display-record record)
+  (define tab-name (assoc-ref record 'tab-name))
+  (define record-data (assoc-ref record 'data))
+  (display "Record ")(display tab-name)(newline)
+  (for-each
+    (lambda (field value)
+      (display field)(display ": ")(display value)(newline))
+    (db-meta 'fields tab-name)
+    (vector->list record-data))
+  (newline))
 
-;(define-public (less-proc-for-fields tab-name fields)
-;  (lambda (record-1 record-2)
-;    (for-each
-;      (lambda (field)
-;        (define less-proc (less-proc-for-field tab-name field))
-;        (define value-1 (
-;        (if (less-proc 
-;        )
-;      fields)))
+(define-public (less-proc-for-fields tab-name fields)
+  (lambda (record-1 record-2)
+    (call/cc
+      (lambda (cont)
+        (for-each
+          (lambda (field)
+            (define less-proc (less-proc-for-field tab-name field))
+            (define value-1 (record-value record-1 field))
+            (define value-2 (record-value record-2 field))
+            (if (less-proc value-1 value-2)
+              (cont #t)
+              (if (less-proc value-2 value-1)
+                (cont #f)
+                '())))
+          fields)
+        (cont #f)))))
 
 (define-public make-record
   (lambda (tab-name . pairs)
@@ -97,14 +112,14 @@
 ;  (for-each
 ;    (db-meta 'fields 
 
-(define-public (db-insert! db tab-name record)
-  (define indices (db-meta 'indices tab-name))
-  (for-each
-    (lambda (fields)
-      (define index (db-meta 'table tab-name 'index fields))
-      (bst-add! less-rec
-    )
-    indices))
+;(define-public (db-insert! db tab-name record)
+;  (define indices (db-meta 'indices tab-name))
+;  (for-each
+;    (lambda (fields)
+;      (define index (db-meta 'table tab-name 'index fields))
+;      (bst-add! less-rec
+;    )
+;    indices))
 
 ;(define-public (insert-record! db tab-name record)
 ;  (let ((h (cdr (assoc (list 'table tab-name 'data) db))))

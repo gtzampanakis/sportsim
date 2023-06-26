@@ -9,11 +9,18 @@
 (define-public (test-foo test-fns)
   (define db (create-db))
   (set! db (create-tab db 'player))
-  (display (field-type 'player 'id))(newline)
-  (display (field-index 'player 'id))(newline)
-  (define record (make-record 'player (cons 'name "foo")))
-  (display record)(newline)
-  (display (record-value record 'dob))(newline)
+
+  (define record-1 (make-record 'player (cons 'id 1) (cons 'name "foo1")))
+  (display-record record-1)
+
+  (define record-2 (make-record 'player (cons 'id 2) (cons 'name "foo2")))
+  (display-record record-2)
+
+  (define less-proc (less-proc-for-fields 'player '(id name)))
+
+  (display (less-proc record-1 record-2))(newline)
+  (display (less-proc record-2 record-1))(newline)
+
   ;(let loop ((i 8))
   ;  (when (> i 0)
   ;    (set! db
