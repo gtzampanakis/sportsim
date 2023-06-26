@@ -131,7 +131,10 @@
 
 (define-syntax make-record
   (syntax-rules ()
-    ((_ tab-name (field value) ...) (-make-record . args))))
+    ((_ tab-name)
+      (-make-record (quote tab-name)))
+    ((_ tab-name (field1 value1) ...)
+      (-make-record (quote tab-name) (cons (quote field1) value1) ...))))
 
 ;(define*
 ;    (query-tab
