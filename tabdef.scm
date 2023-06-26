@@ -1,7 +1,6 @@
-(define-module (tabdef)
-  #:export (db-meta))
+(define-module (tabdef))
 
-(define db-meta
+(define-public db-meta
   (lambda args
     (cond
       ((equal? args '(fields player))
@@ -11,7 +10,7 @@
       ((equal? args '(indices player))
         (list
           '(id)
-          '(name id)
+          '(name)
           '(dob)))
       ((equal? args '(fields country))
         '(id name))

@@ -1,11 +1,5 @@
 (define-module (db)
-  #:export (
-    make-record
-    field-to-index
-    fields-to-values
-    record-attr
-    record-set-attr!
-    query-tab))
+  #:export (make-record))
 
 (use-modules (srfi srfi-19))
 
@@ -96,7 +90,7 @@
           fields)
         (cont #f)))))
 
-(define-public make-record
+(define-public -make-record
   (lambda (tab-name . pairs)
     (define field-names (db-meta 'fields tab-name))
     (define data-vector
@@ -134,6 +128,10 @@
       (assoc-set! db (list 'table tab-name 'index fields) new-index))
     indices)
   db)
+
+(define-syntax make-record
+  (syntax-rules ()
+    ((_ tab-name (field value) ...) (-make-record . args))))
 
 ;(define*
 ;    (query-tab

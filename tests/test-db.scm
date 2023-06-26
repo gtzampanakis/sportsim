@@ -15,20 +15,10 @@
   (define record-3 (make-record 'player (cons 'id 3) (cons 'name "foo3")))
   (define record-4 (make-record 'player (cons 'id 4) (cons 'name "foo4")))
 
-  (define less-proc (less-proc-for-fields 'player '(id name)))
-
   (set! db (db-insert! db 'player record-1))
   (set! db (db-insert! db 'player record-2))
   (set! db (db-insert! db 'player record-3))
   (set! db (db-insert! db 'player record-4))
-  (display-bst (assoc-ref db (list 'table 'player 'index '(dob))))
-
-  ;(let loop ((i 8))
-  ;  (when (> i 0)
-  ;    (set! db
-  ;      (db-insert!
-  ;        db 'player (make-record 'player (cons 'name "foo"))))
-  ;    (loop (1- i))))
-  ;(display-bst (assoc-ref db (list 'table 'player 'index '(id))))(newline)
+  (display-bst (assoc-ref db (list 'table 'player 'index '(name))))
 )
 
