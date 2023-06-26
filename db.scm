@@ -22,46 +22,90 @@
   (number->string (random max-id) 16))
 
 (define-public (create-tab db tab-name)
-  (let ((pair (cons (list 'table tab-name 'data) (bst-make))))
-    (cons pair db)))
+  (define indices (db-meta 'indices tab-name))
+  (for-each
+    (lambda (fields)
+      (set! db
+        (cons
+          (cons (list 'table tab-name 'index fields) (bst-make))
+          db)))
+    indices)
+  db)
 
-(define-public (less-record-pk record-1 record-2)
-  (string<? (vector-ref record-1 0) (vector-ref record-2 0)))
+(define-public (field-type tab-name field)
+  (call/cc
+    (lambda (cont)
+      (for-each
+        (lambda (field-name field-type)
+          (if (equal? field-name field)
+            (cont field-type)))
+        (db-meta 'fields tab-name)
+        (db-meta 'field-types tab-name)))))
+
+(define-public (field-index tab-name field)
+  (let loop ((i 0) (fields (db-meta 'fields tab-name)))
+    (if (equal? (car fields) field)
+      i
+      (loop (1+ i) (cdr fields)))))
+
+(define-public (record-value record field)
+  (define tab-name (assoc-ref record 'tab-name))
+  (define record-data (assoc-ref record 'data))
+  (vector-ref record-data (field-index tab-name field)))
+
+(define-public (less-proc-for-field tab-name field)
+  (define field-type (field-type tab-name field))
+  (cond
+    ((equal? field-type 'integer) <)
+    ((equal? field-type 'string) string<?)))
+
+(define-public (display-record)
+  1)
+
+;(define-public (less-proc-for-fields tab-name fields)
+;  (lambda (record-1 record-2)
+;    (for-each
+;      (lambda (field)
+;        (define less-proc (less-proc-for-field tab-name field))
+;        (define value-1 (
+;        (if (less-proc 
+;        )
+;      fields)))
 
 (define-public make-record
   (lambda (tab-name . pairs)
     (define field-names (db-meta 'fields tab-name))
-    (list->vector
-      (map
-        (lambda (field-name)
-          (call/cc
-            (lambda (cont)
-              (for-each
-                (lambda (pair)
-                  (let ((k (car pair)) (v (cdr pair)))
-                    (when (equal? field-name k)
-                      (cont v))))
-                pairs)
-              (if (equal? field-name 'id) (generate-id) '()))))
-        field-names))))
+    (define data-vector
+      (list->vector
+        (map
+          (lambda (field-name)
+            (call/cc
+              (lambda (cont)
+                (for-each
+                  (lambda (pair)
+                    (let ((k (car pair)) (v (cdr pair)))
+                      (when (equal? field-name k)
+                        (cont v))))
+                  pairs)
+                (if (equal? field-name 'id) (generate-id) '()))))
+          field-names)))
+    (list
+      (cons 'tab-name tab-name)
+      (cons 'data data-vector))))
+
+;(define-public (record-get-field record field)
+;  (for-each
+;    (db-meta 'fields 
 
 (define-public (db-insert! db tab-name record)
-  (define k (list 'table tab-name 'data))
-  (define table-data (assoc-ref db k))
-  (assoc-set! db
-    k
-    (bst-add! less-record-pk table-data record))
-  db)
+  (define indices (db-meta 'indices tab-name))
+  (for-each
+    (lambda (fields)
+      (define index (db-meta 'table tab-name 'index fields))
+      (bst-add! less-rec
+    )
+    indices))
 
-; TODO: indices
-
-;(define-public (create-index db tab-name fields)
-;  (define pair
-;    (cons
-;      (list 'table tab-name 'index fields)
-;      (make-vector 10 #f)))
-;  (cons pair db))
-;
 ;(define-public (insert-record! db tab-name record)
 ;  (let ((h (cdr (assoc (list 'table tab-name 'data) db))))
 ;    (hash-set! h (vector-ref record 0) record)))

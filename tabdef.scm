@@ -5,7 +5,14 @@
   (lambda args
     (cond
       ((equal? args '(fields player))
-        '(id name dob team-id ratings))
+        '(id name dob team-id))
+      ((equal? args '(field-types player))
+        '(integer string string integer))
+      ((equal? args '(indices player))
+        (list
+          '(id)
+          '(name)
+          '(dob)))
       ((equal? args '(fields country))
         '(id name))
       ((equal? args '(fields team))
