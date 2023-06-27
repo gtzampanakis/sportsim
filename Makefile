@@ -3,8 +3,8 @@ all:\
 	compiled/conf.scm.go\
 	compiled/db.scm.go\
 	compiled/lib/util.scm.go\
-	compiled/main.scm.go\
 	compiled/test-runner.scm.go\
+	compiled/tests/test-db.scm.go\
 	compiled/tests/test-date.scm.go\
 	compiled/tests/test-util.scm.go\
 	compiled/tests/test-bst.scm.go
@@ -24,11 +24,11 @@ compiled/db.scm.go: db.scm
 compiled/lib/util.scm.go: lib/util.scm
 	guild compile -L . lib/util.scm -o compiled/lib/util.scm.go
 
-compiled/main.scm.go: main.scm
-	guild compile -L . main.scm -o compiled/main.scm.go
-
 compiled/test-runner.scm.go: test-runner.scm
 	guild compile -L . test-runner.scm -o compiled/test-runner.scm.go
+
+compiled/tests/test-db.scm.go: tests/test-db.scm
+	guild compile -L . tests/test-db.scm -o compiled/tests/test-db.scm.go
 
 compiled/tests/test-date.scm.go: tests/test-date.scm
 	guild compile -L . tests/test-date.scm -o compiled/tests/test-date.scm.go
