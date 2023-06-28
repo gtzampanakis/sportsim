@@ -26,15 +26,17 @@
     indices)
   db)
 
-(define-public (field-type tab-name field)
-  (call/cc
-    (lambda (cont)
-      (for-each
-        (lambda (field-name field-type)
-          (if (equal? field-name field)
-            (cont field-type)))
-        (db-meta 'fields tab-name)
-        (db-meta 'field-types tab-name)))))
+(define-public field-type
+  (memoized-proc
+    (lambda (tab-name field)
+      (call/cc
+        (lambda (cont)
+          (for-each
+            (lambda (field-name field-type)
+              (if (equal? field-name field)
+                (cont field-type)))
+            (db-meta 'fields tab-name)
+            (db-meta 'field-types tab-name)))))))
 
 (define-public (field-index tab-name field)
   (let loop ((i 0) (fields (db-meta 'fields tab-name)))
@@ -73,22 +75,24 @@
     (vector->list record-data))
   (newline))
 
-(define-public (less-proc-for-fields tab-name fields)
-  (lambda (record-1 record-2)
-    (call/cc
-      (lambda (cont)
-        (for-each
-          (lambda (field)
-            (define less-proc (less-proc-for-field tab-name field))
-            (define value-1 (record-value record-1 field))
-            (define value-2 (record-value record-2 field))
-            (if (less-proc value-1 value-2)
-              (cont #t)
-              (if (less-proc value-2 value-1)
-                (cont #f)
-                '())))
-          fields)
-        (cont #f)))))
+(define-public less-proc-for-fields
+  (memoized-proc
+    (lambda (tab-name fields)
+      (lambda (record-1 record-2)
+        (call/cc
+          (lambda (cont)
+            (for-each
+              (lambda (field)
+                (define less-proc (less-proc-for-field tab-name field))
+                (define value-1 (record-value record-1 field))
+                (define value-2 (record-value record-2 field))
+                (if (less-proc value-1 value-2)
+                  (cont #t)
+                  (if (less-proc value-2 value-1)
+                    (cont #f)
+                    '())))
+              fields)
+            (cont #f)))))))
 
 (define-public -make-record
   (lambda (tab-name . pairs)

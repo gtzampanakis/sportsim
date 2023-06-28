@@ -354,3 +354,21 @@
         (car strings)
         dlm
         (apply join (cons dlm (cdr strings)))))))
+
+(define-public (find-in-cache cache key)
+  (if (null? cache)
+    '---not-found-c96020fd---
+    (let ((pair (car cache)))
+      (if (equal? (car pair) key)
+        (cdr pair)
+        (find-in-cache (cdr cache) key)))))
+
+(define-public (memoized-proc proc)
+  (define cache '())
+  (lambda args
+    (define from-cache (find-in-cache cache args))
+    (if (equal? from-cache '---not-found-c96020fd---)
+      (let ((r (apply proc args)))
+        (set! cache (cons (cons args r) cache))
+        r)
+      from-cache)))
