@@ -10,10 +10,10 @@
   (define db (create-db))
   (set! db (create-tab db 'player))
 
-  (define record-1 (make-record player (id 1) (name "foo1")))
-  (define record-2 (make-record player (id 2) (name "foo2")))
-  (define record-3 (make-record player (id 3) (name "foo3")))
-  (define record-4 (make-record player (id 4) (name "foo4")))
+  (define record-1 (make-record 'player (id 1) (name "foo1")))
+  (define record-2 (make-record 'player (id 2) (name "foo2")))
+  (define record-3 (make-record 'player (id 3) (name "foo3")))
+  (define record-4 (make-record 'player (id 4) (name "foo4")))
 
   (set! db (db-insert! db 'player record-1))
   (set! db (db-insert! db 'player record-2))

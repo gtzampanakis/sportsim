@@ -4,9 +4,9 @@
 
 (use-modules (lib util))
 
-(define-public conf (list
+(define-public sportsim-conf (list
   (cons 'start-date (date 2022 8 1))
   (cons 'stop-date (date 2032 8 1))
-  (cons 'n-countries 1)
+  (cons 'n-countries 4)
   (cons 'n-players-per-team 11)
   (cons 'n-teams-per-country 18)))

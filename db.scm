@@ -132,9 +132,12 @@
 (define-syntax make-record
   (syntax-rules ()
     ((_ tab-name)
-      (-make-record (quote tab-name)))
+      (-make-record tab-name))
     ((_ tab-name (field1 value1) ...)
-      (-make-record (quote tab-name) (cons (quote field1) value1) ...))))
+      (-make-record tab-name (cons (quote field1) value1) ...))))
+
+(define-public (query-tab db tab-name pred order-by limit)
+  1)
 
 ;(define*
 ;    (query-tab
