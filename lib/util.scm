@@ -344,3 +344,13 @@
             as-of-date
             (loop (add-day as-of-date)))))))
   result)
+
+(define-public (join dlm . strings)
+  (cond
+    ((null? strings) "")
+    ((null? (cdr strings)) (car strings))
+    (else
+      (string-append
+        (car strings)
+        dlm
+        (apply join (cons dlm (cdr strings)))))))

@@ -16,9 +16,25 @@
 
   (define n-countries (assoc-ref sportsim-conf 'n-countries))
   (define n-teams-per-country (assoc-ref sportsim-conf 'n-teams-per-country))
+  (define n-players-per-team (assoc-ref sportsim-conf 'n-players-per-team))
   (define db (create-db))
   (set! db (create-tab db 'country))
   (set! db (create-tab db 'team))
+  (set! db (create-tab db 'player))
+
+  (define (gen-players db team-id country-id)
+    (let loop ((i-player 0))
+      (when (< i-player n-players-per-team)
+        (let ()
+          (define r
+            (make-record 'player
+              (name
+                (join
+                  "-" "player" country-id team-id (number->string i-player)))
+              (team-id team-id)))
+          (set! db (db-insert! db 'player r))
+          (loop (1+ i-player)))))
+    db)
 
   (define (gen-teams db country-id)
     (let loop ((i-team 0))
@@ -26,9 +42,10 @@
         (let ()
           (define r
             (make-record 'team
-              (name (string-append "team-" (number->string i-team)))
+              (name (join "-" country-id (number->string i-team)))
               (country-id country-id)))
           (set! db (db-insert! db 'team r))
+          (set! db (gen-players db (record-value r 'id) country-id))
           (loop (1+ i-team)))))
     db)
 
@@ -37,7 +54,7 @@
       (let ()
         (define r
           (make-record 'country
-            (name (string-append "country-" (number->string i-country)))))
+            (name (join "-" "country" (number->string i-country)))))
         (set! db (db-insert! db 'country r))
         (set! db (gen-teams db (record-value r 'id)))
         (loop (1+ i-country)))))
@@ -46,7 +63,8 @@
   (display-line "Ending sportsim...")
 )
 
-(main)
+(use-modules (statprof))
+(statprof main)
 
 ;(define (create-entities! db tab-name n creator-proc)
 ;  (let loop ((i 0))

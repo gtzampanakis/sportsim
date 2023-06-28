@@ -3,15 +3,22 @@
 (define-public db-meta
   (lambda args
     (cond
+
       ((equal? args '(fields player))
         '(id name dob team-id))
       ((equal? args '(field-types player))
-        '(string string string integer))
+        (list
+          'string
+          'string
+          'string
+          'string))
       ((equal? args '(indices player))
         (list
           '(id)
           '(name)
-          '(dob)))
+          '(dob)
+          '(team-id)))
+
       ((equal? args '(fields country))
         '(id name))
       ((equal? args '(field-types country))
@@ -20,6 +27,7 @@
         (list
           '(id)
           '(name)))
+
       ((equal? args '(fields team))
         '(id name country-id))
       ((equal? args '(field-types team))
@@ -28,8 +36,25 @@
         (list
           '(id)
           '(name)))
+
+      ((equal? args '(fields competition-series))
+        '(id name country-id))
+      ((equal? args '(field-types competition-series))
+        '(string string string))
+      ((equal? args '(indices competition-series))
+        (list
+          '(id)
+          '(name)))
+
       ((equal? args '(fields competition))
         '(id name start-year country-id))
+      ((equal? args '(field-types competition))
+        '(string string string string))
+      ((equal? args '(indices competition))
+        (list
+          '(id)
+          '(name)))
+
       ((equal? args '(fields event))
         '(
           id
