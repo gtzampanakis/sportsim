@@ -30,7 +30,7 @@
             (make-record 'player
               (name
                 (join
-                  "-" "player" country-id team-id (number->string i-player)))
+                  "-" "player" (number->string country-id) (number->string team-id) (number->string i-player)))
               (team-id team-id)))
           (set! db (db-insert! db 'player r))
           (loop (1+ i-player)))))
@@ -42,7 +42,7 @@
         (let ()
           (define r
             (make-record 'team
-              (name (join "-" country-id (number->string i-team)))
+              (name (join "-" (number->string country-id) (number->string i-team)))
               (country-id country-id)))
           (set! db (db-insert! db 'team r))
           (set! db (gen-players db (record-value r 'id) country-id))

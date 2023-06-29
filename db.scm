@@ -13,7 +13,7 @@
 (define-public (create-db) (bst-make))
 
 (define-public (generate-id)
-  (number->string (random max-id) 16))
+  (random max-id))
 
 (define-public (create-tab db tab-name)
   (define indices (db-meta 'indices tab-name))
@@ -63,7 +63,7 @@
   (define ft (field-type tab-name field))
   (less-proc-respecting-nulls
     (cond
-      ((equal? ft 'integer) <)
+      ((equal? ft 'number) <)
       ((equal? ft 'string) string<?))))
 
 (define-public (display-record record)

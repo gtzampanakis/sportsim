@@ -8,10 +8,10 @@
         '(id name dob team-id))
       ((equal? args '(field-types player))
         (list
+          'number
           'string
           'string
-          'string
-          'string))
+          'number))
       ((equal? args '(indices player))
         (list
           '(id)
@@ -22,7 +22,7 @@
       ((equal? args '(fields country))
         '(id name))
       ((equal? args '(field-types country))
-        '(string string))
+        '(number string))
       ((equal? args '(indices country))
         (list
           '(id)
@@ -31,7 +31,7 @@
       ((equal? args '(fields team))
         '(id name country-id))
       ((equal? args '(field-types team))
-        '(string string string))
+        '(number string number))
       ((equal? args '(indices team))
         (list
           '(id)
@@ -40,7 +40,7 @@
       ((equal? args '(fields competition-series))
         '(id name country-id))
       ((equal? args '(field-types competition-series))
-        '(string string string))
+        '(number string number))
       ((equal? args '(indices competition-series))
         (list
           '(id)
@@ -49,7 +49,7 @@
       ((equal? args '(fields competition))
         '(id name start-year country-id))
       ((equal? args '(field-types competition))
-        '(string string string string))
+        '(number string string number))
       ((equal? args '(indices competition))
         (list
           '(id)
@@ -66,4 +66,6 @@
           scheduled-item-id
           competition-id))
       ((equal? args '(fields scheduled-item))
-        '(id year month day proc)))))
+        '(id year month day proc)))
+
+))
