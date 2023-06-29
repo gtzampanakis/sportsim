@@ -29,14 +29,16 @@
 (define-public field-type
   (memoized-proc
     (lambda (tab-name field)
-      (call/cc
-        (lambda (cont)
+      (call-with-prompt
+        'esc
+        (lambda ()
           (for-each
-            (lambda (field-name field-type)
-              (if (equal? field-name field)
-                (cont field-type)))
+            (lambda (tabdef-field-name tabdef-field-type)
+              (if (equal? tabdef-field-name field)
+                (abort-to-prompt 'esc tabdef-field-type)))
             (db-meta 'fields tab-name)
-            (db-meta 'field-types tab-name)))))))
+            (db-meta 'field-types tab-name)))
+        (lambda (cont return-value) return-value)))))
 
 (define-public (field-index tab-name field)
   (let loop ((i 0) (fields (db-meta 'fields tab-name)))
@@ -76,23 +78,24 @@
   (newline))
 
 (define-public less-proc-for-fields
-  (memoized-proc
-    (lambda (tab-name fields)
-      (lambda (record-1 record-2)
-        (call/cc
-          (lambda (cont)
-            (for-each
-              (lambda (field)
-                (define less-proc (less-proc-for-field tab-name field))
-                (define value-1 (record-value record-1 field))
-                (define value-2 (record-value record-2 field))
-                (if (less-proc value-1 value-2)
-                  (cont #t)
-                  (if (less-proc value-2 value-1)
-                    (cont #f)
-                    '())))
-              fields)
-            (cont #f)))))))
+  (lambda (tab-name fields)
+    (lambda (record-1 record-2)
+      (call-with-prompt
+        'esc
+        (lambda ()
+          (for-each
+            (lambda (field)
+              (define less-proc (less-proc-for-field tab-name field))
+              (define value-1 (record-value record-1 field))
+              (define value-2 (record-value record-2 field))
+              (if (less-proc value-1 value-2)
+                (abort-to-prompt 'esc #t)
+                (if (less-proc value-2 value-1)
+                  (abort-to-prompt 'esc #f)
+                  '())))
+            fields)
+          (abort-to-prompt 'esc #f))
+        (lambda (cont return-value) return-value)))))
 
 (define-public -make-record
   (lambda (tab-name . pairs)
@@ -101,15 +104,17 @@
       (list->vector
         (map
           (lambda (field-name)
-            (call/cc
-              (lambda (cont)
+            (call-with-prompt
+              'esc
+              (lambda ()
                 (for-each
                   (lambda (pair)
                     (let ((k (car pair)) (v (cdr pair)))
                       (when (equal? field-name k)
-                        (cont v))))
+                        (abort-to-prompt 'esc v))))
                   pairs)
-                (if (equal? field-name 'id) (generate-id) '()))))
+                (if (equal? field-name 'id) (generate-id) '()))
+              (lambda (cont return-value) return-value)))
           field-names)))
     (list
       (cons 'tab-name tab-name)
