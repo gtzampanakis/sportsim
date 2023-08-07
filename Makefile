@@ -6,8 +6,8 @@ clean:
 %.scm.go: %.scm
 	guild compile -L . $< -o $@
 
-run: all
-	guile --no-auto-compile -L . main.scm
+run:
+	guile -L . main.scm
 
-test: all
-	guile --no-auto-compile -L . test-runner.scm
+test:
+	guile -L . test-runner.scm

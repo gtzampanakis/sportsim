@@ -35,37 +35,53 @@
       ((equal? args '(indices team))
         (list
           '(id)
-          '(name)))
+          '(name)
+          '(country-id)))
 
-      ((equal? args '(fields competition-series))
-        '(id name country-id))
-      ((equal? args '(field-types competition-series))
-        '(number string number))
-      ((equal? args '(indices competition-series))
+      ((equal? args '(fields competition-type))
+        '(id name))
+      ((equal? args '(field-types competition-type))
+        '(number string))
+      ((equal? args '(indices competition-type))
         (list
           '(id)
           '(name)))
 
       ((equal? args '(fields competition))
-        '(id name start-year country-id))
+        '(
+          id
+          start-year
+          competition-type-id
+          country-id))
       ((equal? args '(field-types competition))
-        '(number string string number))
+        '(
+          number
+          number
+          number
+          number))
       ((equal? args '(indices competition))
         (list
-          '(id)
-          '(name)))
+          '(id)))
 
       ((equal? args '(fields event))
         '(
           id
           datetime
-          proc
           done?
-          team-home
-          team-away
-          scheduled-item-id
+          home-team-id
+          away-team-id
           competition-id))
-      ((equal? args '(fields scheduled-item))
-        '(id year month day proc)))
+      ((equal? args '(field-types event))
+        '(
+          number
+          string
+          number
+          number
+          number
+          number))
+      ((equal? args '(indices event))
+        (list
+          '(id)
+          '(datetime)))
 
-))
+)))
