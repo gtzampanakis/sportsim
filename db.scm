@@ -47,6 +47,7 @@
       (loop (1+ i) (cdr fields)))))
 
 (define-public (record-value record field)
+  (unless (list? record) (error record))
   (define tab-name (assoc-ref record 'tab-name))
   (define record-data (assoc-ref record 'data))
   (vector-ref record-data (field-index tab-name field)))
@@ -85,6 +86,10 @@
         (lambda ()
           (for-each
             (lambda (field)
+              ;(display-line field)
+              ;(display-line record-1)
+              ;(display-line record-2)
+              ;(display-line "")
               (define less-proc (less-proc-for-field tab-name field))
               (define value-1 (record-value record-1 field))
               (define value-2 (record-value record-2 field))
@@ -149,10 +154,17 @@
   (define fields
     (if (null? pred)
       '(id)
-      (car pred)))
-  (define less-proc
-    (less-proc-for-fields tab-name fields))
+      (list (car pred))))
+  (define cmp-op
+    (if (null? pred)
+      '()
+      (cadr pred)))
+  (define cmp-val
+    (if (null? pred)
+      '()
+      (caddr pred)))
+  (define less-proc (less-proc-for-fields tab-name fields))
   (define bst (assoc-ref db (list 'table tab-name 'index fields)))
   (map
     cdr ; Discard the index key, keep the record.
-    (bst-results-list less-proc bst 'asc '() '())))
+    (bst-results-list less-proc bst 'asc cmp-op cmp-val)))
