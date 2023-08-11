@@ -80,25 +80,21 @@
 
 (define-public less-proc-for-fields
   (lambda (tab-name fields)
-    (lambda (record-1 record-2)
+    (lambda (index-payload-1 index-payload-2)
+      (define values-1 (car index-payload-1))
+      (define values-2 (car index-payload-2))
       (call-with-prompt
         'esc
         (lambda ()
           (for-each
-            (lambda (field)
-              ;(display-line field)
-              ;(display-line record-1)
-              ;(display-line record-2)
-              ;(display-line "")
+            (lambda (field value-1 value-2)
               (define less-proc (less-proc-for-field tab-name field))
-              (define value-1 (record-value record-1 field))
-              (define value-2 (record-value record-2 field))
               (if (less-proc value-1 value-2)
                 (abort-to-prompt 'esc #t)
                 (if (less-proc value-2 value-1)
                   (abort-to-prompt 'esc #f)
                   '())))
-            fields)
+            fields values-1 values-2)
           (abort-to-prompt 'esc #f))
         (lambda (cont return-value) return-value)))))
 
@@ -162,7 +158,11 @@
   (define cmp-val
     (if (null? pred)
       '()
-      (caddr pred)))
+      ; Wrap it so that it looks like an index payload so that less-proc can
+      ; act on it. TODO: Fix this so that it is not wasteful by adding another
+      ; argument to bst-for-each, a proc that takes a payload and extracts the
+      ; relevant part to be compared to cmp-val.
+      (cons (list (caddr pred)) '())))
   (define less-proc (less-proc-for-fields tab-name fields))
   (define bst (assoc-ref db (list 'table tab-name 'index fields)))
   (map

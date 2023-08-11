@@ -84,18 +84,23 @@
       (define teams
         (query-tab db 'team
           (list
-            'country-id 'eq (record-value competition-record 'country-id))
+            'country-id
+            'eq
+            (record-value competition-record 'country-id))
           '() '()))
       (for-each
-        (lambda (pair)
-          (define event-record
-            (make-record 'event
-              (datetime 'foo)
-              (done? #f)
-              (home-team-id 'foo)
-              (away-team-id 'foo)
-              (competition-id (record-value competition-record 'id))))
-          (set! db (db-insert! db 'event event-record)))
+        (lambda (round-)
+          (for-each
+            (lambda (pair)
+              (define event-record
+                (make-record 'event
+                  (datetime 'foo)
+                  (done? #f)
+                  (home-team-id (list-ref teams (car pair)))
+                  (away-team-id (list-ref teams (cdr pair)))
+                  (competition-id (record-value competition-record 'id))))
+              (set! db (db-insert! db 'event event-record)))
+            round-))
         rounds))
     (query-tab db 'competition '() '() '()))
 
