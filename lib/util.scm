@@ -16,6 +16,20 @@
     (lambda (e) (display e)(newline))
     ls))
 
+(define-public (lpad s l c)
+  (let loop ((s s))
+    (if (< (string-length s) l)
+      (loop (string-append c s))
+      s)))
+
+(define-public (iso-8601-date date)
+  (string-append
+    (lpad (number->string (date-year date)) 4 "0")
+    "-"
+    (lpad (number->string (date-month date)) 2 "0")
+    "-"
+    (lpad (number->string (date-day date)) 2 "0")))
+
 (define (div-irregular a bs)
   ; Returns (r1 . r2)
   ; where a = (sum bs[:r1]) + r2

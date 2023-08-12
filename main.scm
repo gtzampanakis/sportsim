@@ -1,4 +1,5 @@
 (use-modules (srfi srfi-19))
+(use-modules (ice-9 format))
 
 (use-modules (lib util))
 (use-modules (conf))
@@ -68,41 +69,56 @@
     (make-record 'competition-type (name "league")))
   (set! db (db-insert! db 'competition-type competition-type-record))
 
-  (for-each
-    (lambda (country-record)
-      (define r
-        (make-record 'competition
-          (start-year (date-year start-date))
-          (competition-type-id (record-value competition-type-record 'id))
-          (country-id (record-value country-record 'id))))
-      (set! db (db-insert! db 'competition r)))
-    (query-tab db 'country '() '() '()))
+  (define (schedule-league! first-date)
 
-  (for-each
-    (lambda (competition-record)
-      (define rounds (gen-round-robin n-teams-per-country))
-      (define teams
-        (query-tab db 'team
-          (list
-            'country-id
-            'eq
-            (record-value competition-record 'country-id))
-          '() '()))
-      (for-each
-        (lambda (round-)
-          (for-each
-            (lambda (pair)
-              (define event-record
-                (make-record 'event
-                  (datetime 'foo)
-                  (done? #f)
-                  (home-team-id (list-ref teams (car pair)))
-                  (away-team-id (list-ref teams (cdr pair)))
-                  (competition-id (record-value competition-record 'id))))
-              (set! db (db-insert! db 'event event-record)))
-            round-))
-        rounds))
-    (query-tab db 'competition '() '() '()))
+    (for-each
+      (lambda (country-record)
+        (define r
+          (make-record 'competition
+            (start-year (date-year first-date))
+            (competition-type-id (record-value competition-type-record 'id))
+            (country-id (record-value country-record 'id))))
+        (set! db (db-insert! db 'competition r)))
+      (query-tab db 'country '() '() '()))
+
+    (for-each
+      (lambda (competition-record)
+        ; TODO: gen-round-robin should return full schedule, not only first half of the season
+        (define rounds (gen-round-robin n-teams-per-country))
+        (define teams
+          (query-tab db 'team
+            (list
+              'country-id
+              'eq
+              (record-value competition-record 'country-id))
+            '() '()))
+        (display-line rounds)
+        (let loop ((rounds rounds) (round-index 0))
+          (when (not (null? rounds))
+            (display-line (car rounds))
+            (for-each
+              (lambda (pair)
+                (define event-record
+                  (make-record 'event
+                    (datetime
+                      (iso-8601-date (add-days first-date (* 7 round-index))))
+                    (done? #f)
+                    (home-team-id (list-ref teams (car pair)))
+                    (away-team-id (list-ref teams (cdr pair)))
+                    (competition-id (record-value competition-record 'id))))
+                (display-record event-record)
+                (set! db (db-insert! db 'event event-record)))
+              (car rounds))
+            (loop (cdr rounds) (1+ round-index)))))
+      (query-tab db 'competition '() '() '())))
+
+  (let loop ((current-date start-date))
+    ;(format #t "Current date: ~a\n" current-date)
+    (cond
+      ((and (= (date-month current-date) 8) (= (date-day current-date) 1))
+        (schedule-league! current-date)))
+    (loop (add-day current-date)))
+
 
 
   (display-line "Ending sportsim...")
