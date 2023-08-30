@@ -139,6 +139,9 @@
     indices)
   db)
 
+(define-public (db-index db tab-name fields)
+  (assoc-ref db (list 'table tab-name 'index fields)))
+
 (define-syntax make-record
   (syntax-rules ()
     ((_ tab-name)

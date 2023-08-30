@@ -14,6 +14,7 @@
   (define n-teams-per-country (assoc-ref sportsim-conf 'n-teams-per-country))
   (define n-players-per-team (assoc-ref sportsim-conf 'n-players-per-team))
   (define start-date (assoc-ref sportsim-conf 'start-date))
+  (define stop-date (assoc-ref sportsim-conf 'stop-date))
   (define db (create-db))
   (set! db (create-tab db 'country))
   (set! db (create-tab db 'team))
@@ -113,12 +114,12 @@
       (query-tab db 'competition '() '() '())))
 
   (let loop ((current-date start-date))
-    ;(format #t "Current date: ~a\n" current-date)
-    (cond
-      ((and (= (date-month current-date) 8) (= (date-day current-date) 1))
-        (schedule-league! current-date)))
-    (loop (add-day current-date)))
-
+    (when (date<? current-date stop-date)
+      ;(format #t "Current date: ~a\n" current-date)
+      (cond
+        ((and (= (date-month current-date) 8) (= (date-day current-date) 1))
+          (schedule-league! current-date)))
+      (loop (add-day current-date))))
 
 
   (display-line "Ending sportsim...")
