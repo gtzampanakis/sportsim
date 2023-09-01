@@ -175,20 +175,21 @@ Cheat-sheet:
             '()
             (loop (cddr bst))))))))
 
-(define-public (bst-min-max less-proc bst-input min-max bound)
-  (define proc (if (equal? min-max 'min) cadr cddr))
+(define-public (bst-min-max less-proc bst-input min-max)
+  (define get-next-bst (if (equal? min-max 'min) cadr cddr))
   (if (null? bst-input)
     '()
     (let loop ((bst bst-input))
-      (if (null? (proc bst))
-        (caar bst)
-        (loop (proc bst))))))
+      (let ((next-bst (get-next-bst bst)))
+        (if (null? next-bst)
+          (caar bst)
+          (loop next-bst))))))
 
 (define-public (bst-min less-proc bst-input)
-  (bst-min-max less-proc bst-input 'min '()))
+  (bst-min-max less-proc bst-input 'min))
 
 (define-public (bst-max less-proc bst-input)
-  (bst-min-max less-proc bst-input 'max '()))
+  (bst-min-max less-proc bst-input 'max))
 
 (define (leaf? bst)
   (and
